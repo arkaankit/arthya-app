@@ -6,8 +6,9 @@ import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { Globe, Sparkles, Camera, Edit2, Check, X } from "lucide-react";
+import { Globe, Sparkles, Camera, Edit2, Check, X, Download, Upload, HardDriveDownload } from "lucide-react";
 import { useData } from "../lib/data-context";
+import { storage } from "../lib/storage";
 import { CURRENCIES } from "../lib/currency";
 import { toast } from "sonner@2.0.3";
 
@@ -29,6 +30,7 @@ export function SettingsView({ onResetData, onRestartTour }: SettingsViewProps) 
     avatar: profile?.avatar || ''
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const backupInputRef = useRef<HTMLInputElement>(null);
 
   const handleCurrencyChange = (newCurrency: string) => {
     setSelectedCurrency(newCurrency);
@@ -88,6 +90,33 @@ export function SettingsView({ onResetData, onRestartTour }: SettingsViewProps) 
       avatar: profile?.avatar || ''
     });
     setIsEditingProfile(false);
+  };
+
+  const handleDownloadBackup = () => {
+    const blob = new Blob([storage.exportBackup()], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `arthya-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+    toast.success('Backup downloaded. Keep the file somewhere safe.');
+  };
+
+  const handleRestoreBackup = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    event.target.value = ''; // allow choosing the same file again
+    if (!file) return;
+    if (!confirm('Restoring replaces ALL your current data with the backup. Continue?')) return;
+
+    try {
+      storage.importBackup(await file.text());
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Could not restore this backup.');
+      return;
+    }
+    // Reload so every screen (and the theme preference) picks up the restored data.
+    window.location.reload();
   };
 
   const getInitials = (name: string) => {
@@ -315,6 +344,39 @@ export function SettingsView({ onResetData, onRestartTour }: SettingsViewProps) 
           </div>
         </div>
         
+        {/* Backup & Restore */}
+        <div className="p-6 border border-border rounded-lg">
+          <div className="flex items-start gap-4">
+            <div className="p-3 rounded-xl bg-orange-500/10">
+              <HardDriveDownload className="w-6 h-6 text-orange-600 dark:text-orange-400" />
+            </div>
+            <div className="flex-1">
+              <h4 className="mb-2">Backup & Restore</h4>
+              <p className="text-sm text-muted-foreground mb-4">
+                Your data lives only in this browser. Download a backup file to keep it safe or to
+                move it to another device, then restore it there.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <Button variant="outline" size="sm" onClick={handleDownloadBackup} className="gap-2">
+                  <Download className="w-4 h-4" />
+                  Download Backup
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => backupInputRef.current?.click()} className="gap-2">
+                  <Upload className="w-4 h-4" />
+                  Restore from Backup
+                </Button>
+                <input
+                  ref={backupInputRef}
+                  type="file"
+                  accept="application/json,.json"
+                  className="hidden"
+                  onChange={handleRestoreBackup}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Reset Data */}
         <div className="p-6 border border-destructive rounded-lg bg-destructive/5">
           <div className="flex items-start gap-4">
