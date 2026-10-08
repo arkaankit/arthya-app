@@ -24,9 +24,9 @@ export function IncomeView() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-start justify-between">
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h2 className="mb-2">Income Sources</h2>
+          <h2 className="page-title mb-2">Income Sources</h2>
           <p className="text-muted-foreground">
             Manage and track all your income streams
           </p>
@@ -88,7 +88,7 @@ export function IncomeView() {
           <h3>All Income Sources</h3>
         </div>
 
-        <div className="grid gap-4">
+        <div className="grid grid-cols-1 gap-4">
           {incomeStreams.map((stream) => (
             <IncomeStreamItem 
               key={stream.id} 

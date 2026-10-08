@@ -73,14 +73,11 @@ export function DashboardView() {
       existing.value += monthlyAmount;
     } else {
       const categoryColors: Record<string, string> = {
-        Housing: '#F59E0B',
-        Transportation: '#FBBF24',
-        Family: '#F97316',
-        Business: '#FB923C',
-        Entertainment: '#FCD34D',
-        Food: '#EF4444',
-        Healthcare: '#EC4899',
-        Utilities: '#14B8A6'
+        Housing: '#ff5e24',
+        Transportation: '#ffa47a',
+        Family: '#6c3200',
+        Business: '#5c6066',
+        Others: '#989ea4'
       };
       acc.push({
         name: expense.category,
@@ -112,7 +109,7 @@ export function DashboardView() {
         
         <div className="space-y-6">
           <div>
-            <h2 className="mb-2">Dashboard</h2>
+            <h2 className="page-title mb-2">Dashboard</h2>
             <p className="text-muted-foreground">
               Your complete financial picture at a glance
             </p>
@@ -176,21 +173,21 @@ export function DashboardView() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h2 className="mb-2">Dashboard</h2>
+        <h2 className="page-title mb-2">Dashboard</h2>
         <p className="text-muted-foreground">
           Overview of your financial health
         </p>
       </div>
 
       {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <DashboardMetricCard
           title="Total Balance"
           value={formatCurrency(totalBalance, baseCurrency)}
           change="+12.5% from last month"
           changeType="positive"
           icon={Wallet}
-          iconColor="#F59E0B"
+          iconColor="#ff5e24"
         />
         <DashboardMetricCard
           title="Monthly Income"
@@ -214,7 +211,7 @@ export function DashboardView() {
           change="+18.3% from last month"
           changeType="positive"
           icon={PiggyBank}
-          iconColor="#FBBF24"
+          iconColor="#ffa47a"
         />
       </div>
 
@@ -258,8 +255,8 @@ export function DashboardView() {
               />
               <Line 
                 type="monotone" 
-                dataKey="savings" 
-                stroke="#F59E0B" 
+                dataKey="savings"
+                stroke="#ff5e24"
                 strokeWidth={2}
                 name="Savings"
               />

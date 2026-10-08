@@ -57,23 +57,23 @@ export function ExpenseItem({
   return (
     <>
       <ExpenseDialog open={showEditDialog} onOpenChange={setShowEditDialog} id={id} />
-      <Card className="p-5 border-border/50 hover:border-border transition-colors group">
-        <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
+      <Card className="p-4 sm:p-5 border-border/50 hover:border-border transition-colors group">
+        <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 sm:gap-4 min-w-0">
           <div 
             className="p-3 rounded-xl"
             style={{ backgroundColor: `${color}20` }}
           >
             <ArrowDownCircle className="w-5 h-5" style={{ color }} />
           </div>
-          <div>
-            <h4 className="mb-1">{name}</h4>
+          <div className="min-w-0">
+            <h4 className="mb-1 truncate">{name}</h4>
             <Badge variant="outline" className="text-xs" style={{ borderColor: color, color }}>
               {category}
             </Badge>
           </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <div className="text-right">
             <div className="flex items-center gap-2 justify-end">
               <span className="text-sm">{getCurrencyFlag(currency)}</span>
@@ -88,7 +88,7 @@ export function ExpenseItem({
             )}
             <p className="text-xs text-muted-foreground capitalize">{frequency}</p>
           </div>
-          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <div className="flex shrink-0 gap-1 transition-opacity can-hover:opacity-0 can-hover:group-hover:opacity-100 can-hover:group-focus-within:opacity-100">
             <Button
               variant="ghost"
               size="sm"
