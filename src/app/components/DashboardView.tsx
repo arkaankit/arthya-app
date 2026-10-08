@@ -101,7 +101,7 @@ export function DashboardView() {
   });
   
   // Show empty state if no data
-  if (accounts.length === 0) {
+  if (accounts.length === 0 && incomeStreams.length === 0 && expenses.length === 0) {
     return (
       <>
         <AccountDialog open={showAddAccount} onOpenChange={setShowAddAccount} />
@@ -300,16 +300,18 @@ export function DashboardView() {
       </div>
 
       {/* Accounts Overview */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h3>Accounts Overview</h3>
+      {accounts.length > 0 && (
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h3>Accounts Overview</h3>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {accounts.slice(0, 3).map((account) => (
+              <AccountCard key={account.id} {...account} />
+            ))}
+          </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {accounts.slice(0, 3).map((account) => (
-            <AccountCard key={account.id} {...account} />
-          ))}
-        </div>
-      </div>
+      )}
 
       {/* Goals Progress */}
       {goals.length > 0 && (

@@ -6,6 +6,7 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { useData } from "../lib/data-context";
+import { AccountSelect } from "./AccountSelect";
 import { CURRENCIES, getCurrencySymbol } from "../lib/currency";
 import { EXPENSE_CATEGORIES, FREQUENCIES } from "../lib/constants";
 import { toast } from "sonner@2.0.3";
@@ -37,13 +38,13 @@ export function ExpenseDialog({ open, onOpenChange, id }: ExpenseDialogProps) {
     setCategory(expense?.category ?? "Housing");
     setSubcategory(expense?.subcategory ?? "");
     setFrequency(expense?.frequency ?? "monthly");
-    setAccountId(expense?.accountId ?? "");
+    setAccountId(expense ? expense.accountId ?? "" : accounts[0]?.id ?? "");
     setAssetId(expense?.assetId ?? "");
   }, [open, expense]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !amount || !accountId) return;
+    if (!name || !amount) return;
 
     const data = {
       name,
@@ -52,7 +53,7 @@ export function ExpenseDialog({ open, onOpenChange, id }: ExpenseDialogProps) {
       category,
       subcategory: subcategory || category,
       frequency,
-      accountId,
+      accountId: accountId || undefined,
       assetId: assetId || undefined
     };
     if (id) updateExpense(id, data);
@@ -173,21 +174,7 @@ export function ExpenseDialog({ open, onOpenChange, id }: ExpenseDialogProps) {
             </Select>
           </div>
 
-          <div>
-            <Label htmlFor="account">Payment Account</Label>
-            <Select value={accountId} onValueChange={setAccountId}>
-              <SelectTrigger className="mt-2">
-                <SelectValue placeholder="Select account" />
-              </SelectTrigger>
-              <SelectContent>
-                {accounts.map((account) => (
-                  <SelectItem key={account.id} value={account.id}>
-                    {account.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <AccountSelect label="Payment Account" value={accountId} onChange={setAccountId} />
 
           <div>
             <Label htmlFor="asset">Linked Asset (Optional)</Label>

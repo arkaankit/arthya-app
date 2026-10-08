@@ -7,6 +7,7 @@ import { Label } from "./ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { DollarSign, Calendar } from "lucide-react";
 import { useData } from "../lib/data-context";
+import { AccountSelect } from "./AccountSelect";
 import { toast } from "sonner@2.0.3";
 
 type Priority = "high" | "medium" | "low";
@@ -35,12 +36,12 @@ export function GoalDialog({ open, onOpenChange, id }: GoalDialogProps) {
     setCurrentAmount(goal?.currentAmount.toString() ?? "");
     setDeadline(goal?.deadline ?? "");
     setPriority(goal?.priority ?? "medium");
-    setAccountId(goal?.accountId ?? "");
+    setAccountId(goal ? goal.accountId ?? "" : accounts[0]?.id ?? "");
   }, [open, goal]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !targetAmount || !deadline || !accountId) return;
+    if (!name || !targetAmount || !deadline) return;
 
     const data = {
       name,
@@ -48,7 +49,7 @@ export function GoalDialog({ open, onOpenChange, id }: GoalDialogProps) {
       currentAmount: parseFloat(currentAmount) || 0,
       deadline,
       priority,
-      accountId
+      accountId: accountId || undefined
     };
     if (id) updateGoal(id, data);
     else addGoal(data);
@@ -144,21 +145,7 @@ export function GoalDialog({ open, onOpenChange, id }: GoalDialogProps) {
             </Select>
           </div>
 
-          <div>
-            <Label htmlFor="account">Linked Account</Label>
-            <Select value={accountId} onValueChange={setAccountId}>
-              <SelectTrigger className="mt-2">
-                <SelectValue placeholder="Select account" />
-              </SelectTrigger>
-              <SelectContent>
-                {accounts.map((account) => (
-                  <SelectItem key={account.id} value={account.id}>
-                    {account.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <AccountSelect label="Linked Account" value={accountId} onChange={setAccountId} />
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
