@@ -20,12 +20,12 @@ export function DashboardMetricCard({
 }: DashboardMetricCardProps) {
   return (
     <Card className="p-6 border-border/50 hover:border-border transition-colors">
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <p className="text-muted-foreground mb-2">{title}</p>
-          <h3 className="mb-1">{value}</h3>
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex-1 min-w-0">
+          <p className="text-sm sm:text-base text-muted-foreground mb-2">{title}</p>
+          <h3 className="mb-1 truncate">{value}</h3>
           {change && (
-            <p className={`text-sm ${
+            <p className={`text-xs sm:text-sm ${
               changeType === 'positive' ? 'text-green-600 dark:text-green-400' :
               changeType === 'negative' ? 'text-red-600 dark:text-red-400' :
               'text-muted-foreground'
@@ -34,11 +34,11 @@ export function DashboardMetricCard({
             </p>
           )}
         </div>
-        <div 
-          className="p-3 rounded-xl"
+        <div
+          className="p-2 sm:p-3 rounded-xl shrink-0"
           style={{ backgroundColor: `${iconColor}20` }}
         >
-          <Icon className="w-6 h-6" style={{ color: iconColor }} />
+          <Icon className="w-4 h-4 sm:w-6 sm:h-6" style={{ color: iconColor }} />
         </div>
       </div>
     </Card>

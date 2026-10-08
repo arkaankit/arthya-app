@@ -67,7 +67,7 @@ export function GoalProgressCard({
             </p>
           </div>
         </div>
-        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex shrink-0 gap-1 transition-opacity can-hover:opacity-0 can-hover:group-hover:opacity-100 can-hover:group-focus-within:opacity-100">
           <Button
             variant="ghost"
             size="sm"

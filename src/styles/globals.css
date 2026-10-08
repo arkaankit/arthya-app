@@ -1,4 +1,6 @@
 @custom-variant dark (&:is(.dark *));
+/* Only devices with a real hover (mouse/trackpad); touch screens keep hover-only controls visible. */
+@custom-variant can-hover (@media (hover: hover));
 
 /* Obscura design system: cloud-mist canvas, white paper cards, one Signal Orange accent. */
 :root {
@@ -184,6 +186,13 @@
      bg-gradient-* class, so the base color lives here and gradients tint on top of it. */
   [data-slot="card"] {
     background-color: var(--card);
+  }
+}
+
+/* Phones: cards use 16px padding (Obscura card padding) instead of the desktop 24px. */
+@media (max-width: 639px) {
+  [data-slot="card"].p-6 {
+    padding: 1rem;
   }
 }
 

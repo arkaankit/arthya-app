@@ -158,7 +158,7 @@ export function SettingsView({ onResetData, onRestartTour }: SettingsViewProps) 
                 {isEditingProfile && (
                   <button
                     onClick={() => fileInputRef.current?.click()}
-                    className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center transition-opacity opacity-60 can-hover:opacity-0 can-hover:group-hover:opacity-100"
                   >
                     <Camera className="w-6 h-6 text-white" />
                   </button>

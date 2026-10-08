@@ -40,7 +40,7 @@ export function PlanningView() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-start justify-between">
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h2 className="page-title mb-2">Financial Planning</h2>
           <p className="text-muted-foreground">

@@ -219,7 +219,7 @@ function AppContent() {
 
         <main className="flex-1 overflow-auto">
           <div className="border-b border-border bg-card/90 backdrop-blur sticky top-0 z-10">
-            <div className="flex items-center gap-4 px-6 py-4">
+            <div className="flex items-center gap-3 sm:gap-4 px-4 sm:px-6 py-3 sm:py-4">
               <Button 
                 variant="ghost" 
                 size="icon"
@@ -234,7 +234,7 @@ function AppContent() {
                   <ArthyaLogo size={40} />
                   <div>
                     <h3 className="bg-clip-text text-transparent" style={WORDMARK_STYLE}>Arthya</h3>
-                    <p className="text-xs text-muted-foreground">Smart Financial Planning</p>
+                    <p className="text-xs text-muted-foreground whitespace-nowrap">Smart Financial Planning</p>
                   </div>
                 </div>
                 
@@ -257,7 +257,7 @@ function AppContent() {
               </div>
             </div>
 
-            <div className="p-6 lg:p-8">
+            <div className="p-4 sm:p-6 lg:p-8">
               <div className="max-w-[1600px] mx-auto">
                 {renderView()}
               </div>

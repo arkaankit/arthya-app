@@ -180,14 +180,14 @@ export function DashboardView() {
       </div>
 
       {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <DashboardMetricCard
           title="Total Balance"
           value={formatCurrency(totalBalance, baseCurrency)}
           change="+12.5% from last month"
           changeType="positive"
           icon={Wallet}
-          iconColor="#F59E0B"
+          iconColor="#ff5e24"
         />
         <DashboardMetricCard
           title="Monthly Income"
@@ -211,7 +211,7 @@ export function DashboardView() {
           change="+18.3% from last month"
           changeType="positive"
           icon={PiggyBank}
-          iconColor="#FBBF24"
+          iconColor="#ffa47a"
         />
       </div>
 
