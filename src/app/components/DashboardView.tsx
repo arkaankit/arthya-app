@@ -32,8 +32,7 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  ResponsiveContainer,
-  Legend
+  ResponsiveContainer
 } from "recharts";
 
 export function DashboardView() {
@@ -88,16 +87,18 @@ export function DashboardView() {
     return acc;
   }, [] as Array<{ name: string; value: number; color: string }>);
   
-  // Mock monthly trends (in a real app, this would be calculated from historical data)
-  const monthlyTrends = [
-    { month: 'Apr', income: totalIncome * 0.95, expenses: totalExpenses * 0.9, savings: (totalIncome * 0.95) - (totalExpenses * 0.9) },
-    { month: 'May', income: totalIncome * 1.02, expenses: totalExpenses * 0.95, savings: (totalIncome * 1.02) - (totalExpenses * 0.95) },
-    { month: 'Jun', income: totalIncome * 0.98, expenses: totalExpenses * 0.88, savings: (totalIncome * 0.98) - (totalExpenses * 0.88) },
-    { month: 'Jul', income: totalIncome * 1.05, expenses: totalExpenses * 0.92, savings: (totalIncome * 1.05) - (totalExpenses * 0.92) },
-    { month: 'Aug', income: totalIncome * 1.01, expenses: totalExpenses * 1.05, savings: (totalIncome * 1.01) - (totalExpenses * 1.05) },
-    { month: 'Sep', income: totalIncome * 1.08, expenses: totalExpenses * 0.91, savings: (totalIncome * 1.08) - (totalExpenses * 0.91) },
-    { month: 'Oct', income: totalIncome, expenses: totalExpenses, savings: netSavings }
-  ];
+  const savingsRate = totalIncome > 0 ? (netSavings / totalIncome) * 100 : 0;
+
+  // No history is stored, so instead of invented past months this projects forward:
+  // today's balance plus the current monthly net savings, for the next 12 months.
+  const projection = Array.from({ length: 13 }, (_, i) => {
+    const date = new Date();
+    date.setMonth(date.getMonth() + i);
+    return {
+      month: i === 0 ? 'Now' : date.toLocaleString('en-US', { month: 'short' }),
+      balance: Math.round(totalBalance + netSavings * i),
+    };
+  });
   
   // Show empty state if no data
   if (accounts.length === 0) {
@@ -184,32 +185,29 @@ export function DashboardView() {
         <DashboardMetricCard
           title="Total Balance"
           value={formatCurrency(totalBalance, baseCurrency)}
-          change="+12.5% from last month"
-          changeType="positive"
+          change={`Across ${accounts.length} ${accounts.length === 1 ? 'account' : 'accounts'}`}
           icon={Wallet}
           iconColor="#ff5e24"
         />
         <DashboardMetricCard
           title="Monthly Income"
           value={formatCurrency(totalIncome, baseCurrency)}
-          change="+5.2% from last month"
-          changeType="positive"
+          change={`From ${incomeStreams.length} ${incomeStreams.length === 1 ? 'source' : 'sources'}`}
           icon={TrendingUp}
           iconColor="#10B981"
         />
         <DashboardMetricCard
           title="Monthly Expenses"
           value={formatCurrency(totalExpenses, baseCurrency)}
-          change="+2.1% from last month"
-          changeType="negative"
+          change={`${expenses.length} recurring ${expenses.length === 1 ? 'item' : 'items'}`}
           icon={TrendingDown}
           iconColor="#EF4444"
         />
         <DashboardMetricCard
           title="Net Savings"
           value={formatCurrency(netSavings, baseCurrency)}
-          change="+18.3% from last month"
-          changeType="positive"
+          change={totalIncome > 0 ? `${savingsRate.toFixed(1)}% of income saved` : 'Add income to see your rate'}
+          changeType={totalIncome === 0 ? 'neutral' : netSavings >= 0 ? 'positive' : 'negative'}
           icon={PiggyBank}
           iconColor="#ffa47a"
         />
@@ -218,47 +216,38 @@ export function DashboardView() {
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <Card className="p-6 lg:col-span-2 border-border/50">
-          <h3 className="mb-6">Financial Trends</h3>
+          <h3 className="mb-1">Balance Projection</h3>
+          <p className="text-sm text-muted-foreground mb-6">
+            Next 12 months if your current recurring income and expenses stay the same
+          </p>
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={monthlyTrends}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis 
-                dataKey="month" 
-                stroke="hsl(var(--muted-foreground))"
-                tick={{ fill: 'hsl(var(--muted-foreground))' }}
+            <LineChart data={projection}>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+              <XAxis
+                dataKey="month"
+                stroke="var(--muted-foreground)"
+                tick={{ fill: 'var(--muted-foreground)', fontSize: 12 }}
               />
-              <YAxis 
-                stroke="hsl(var(--muted-foreground))"
-                tick={{ fill: 'hsl(var(--muted-foreground))' }}
+              <YAxis
+                width={72}
+                stroke="var(--muted-foreground)"
+                tick={{ fill: 'var(--muted-foreground)', fontSize: 12 }}
+                tickFormatter={(v: number) => formatCurrency(v, baseCurrency, { decimals: 0 })}
               />
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: 'hsl(var(--card))',
-                  border: '1px solid hsl(var(--border))',
+              <Tooltip
+                formatter={(v: number) => [formatCurrency(v, baseCurrency), 'Projected balance']}
+                contentStyle={{
+                  backgroundColor: 'var(--card)',
+                  border: '1px solid var(--border)',
                   borderRadius: '8px'
                 }}
               />
-              <Legend />
-              <Line 
-                type="monotone" 
-                dataKey="income" 
-                stroke="#10B981" 
-                strokeWidth={2}
-                name="Income"
-              />
-              <Line 
-                type="monotone" 
-                dataKey="expenses" 
-                stroke="#EF4444" 
-                strokeWidth={2}
-                name="Expenses"
-              />
-              <Line 
-                type="monotone" 
-                dataKey="savings"
+              <Line
+                type="monotone"
+                dataKey="balance"
                 stroke="#ff5e24"
                 strokeWidth={2}
-                name="Savings"
+                name="Projected balance"
               />
             </LineChart>
           </ResponsiveContainer>
@@ -281,10 +270,11 @@ export function DashboardView() {
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
-              <Tooltip 
-                contentStyle={{ 
-                  backgroundColor: 'hsl(var(--card))',
-                  border: '1px solid hsl(var(--border))',
+              <Tooltip
+                formatter={(v: number) => formatCurrency(v, baseCurrency)}
+                contentStyle={{
+                  backgroundColor: 'var(--card)',
+                  border: '1px solid var(--border)',
                   borderRadius: '8px'
                 }}
               />
@@ -301,7 +291,7 @@ export function DashboardView() {
                   <span>{category.name}</span>
                 </div>
                 <span className="text-muted-foreground">
-                  ${category.value.toLocaleString()}
+                  {formatCurrency(category.value, baseCurrency)}
                 </span>
               </div>
             ))}
