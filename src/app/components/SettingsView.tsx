@@ -139,7 +139,7 @@ export function SettingsView({ onResetData, onRestartTour }: SettingsViewProps) 
 
       <div className="grid grid-cols-1 gap-4 max-w-2xl">
         {/* Currency Settings */}
-        <div className="p-6 border border-border rounded-lg">
+        <div className="p-4 sm:p-6 bg-card border border-border rounded-xl shadow-card">
           <div className="flex items-start gap-4">
             <div className="p-3 rounded-xl bg-green-500/10">
               <Globe className="w-6 h-6 text-green-600 dark:text-green-400" />
@@ -173,7 +173,7 @@ export function SettingsView({ onResetData, onRestartTour }: SettingsViewProps) 
         </div>
 
         {/* User Profile */}
-        <div className="p-6 border border-border rounded-lg">
+        <div className="p-4 sm:p-6 bg-card border border-border rounded-xl shadow-card">
           <div className="flex items-start gap-6">
             {/* Avatar Section */}
             <div className="flex flex-col items-center gap-2">
@@ -326,7 +326,7 @@ export function SettingsView({ onResetData, onRestartTour }: SettingsViewProps) 
         </div>
 
         {/* Guided Tour */}
-        <div className="p-6 border border-border rounded-lg">
+        <div className="p-4 sm:p-6 bg-card border border-border rounded-xl shadow-card">
           <div className="flex items-start gap-4">
             <div className="p-3 rounded-xl bg-gradient-to-br from-yellow-500/10 to-orange-500/10 shadow-sm shadow-yellow-500/10">
               <Sparkles className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
@@ -345,7 +345,7 @@ export function SettingsView({ onResetData, onRestartTour }: SettingsViewProps) 
         </div>
         
         {/* Backup & Restore */}
-        <div className="p-6 border border-border rounded-lg">
+        <div className="p-4 sm:p-6 bg-card border border-border rounded-xl shadow-card">
           <div className="flex items-start gap-4">
             <div className="p-3 rounded-xl bg-orange-500/10">
               <HardDriveDownload className="w-6 h-6 text-orange-600 dark:text-orange-400" />
@@ -378,7 +378,7 @@ export function SettingsView({ onResetData, onRestartTour }: SettingsViewProps) 
         </div>
 
         {/* Reset Data */}
-        <div className="p-6 border border-destructive rounded-lg bg-destructive/5">
+        <div className="p-4 sm:p-6 border border-destructive rounded-xl bg-card shadow-card">
           <div className="flex items-start gap-4">
             <div className="flex-1">
               <h4 className="mb-2 text-destructive">Reset All Data</h4>
