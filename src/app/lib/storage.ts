@@ -155,5 +155,45 @@ export const storage = {
   // Clear all data
   clearAll: () => {
     Object.values(STORAGE_KEYS).forEach(key => localStorage.removeItem(key));
+  },
+
+  // Backup file: { app: 'arthya', version, exportedAt, data: { accounts, assets, income, ... } }
+  exportBackup: (): string => {
+    const data = Object.fromEntries(
+      Object.entries(STORAGE_KEYS).map(([name, key]) => [name.toLowerCase(), get<unknown>(key, null)])
+    );
+    return JSON.stringify({ app: 'arthya', version: 1, exportedAt: new Date().toISOString(), data }, null, 2);
+  },
+
+  // Replaces all stored data with a backup. Validates the whole file before writing anything,
+  // so a bad file can never leave the app half-restored. Throws an Error with a user-facing message.
+  importBackup: (text: string) => {
+    let parsed: any;
+    try {
+      parsed = JSON.parse(text);
+    } catch {
+      throw new Error('This file is not a valid backup (it is not JSON).');
+    }
+    if (parsed?.app !== 'arthya' || typeof parsed.data !== 'object' || parsed.data === null) {
+      throw new Error('This file is not an Arthya backup.');
+    }
+    for (const name of ['accounts', 'assets', 'income', 'expenses', 'goals']) {
+      const list = parsed.data[name] ?? [];
+      if (!Array.isArray(list) || list.some((item: any) => typeof item?.id !== 'string')) {
+        throw new Error(`The backup's ${name} data is damaged.`);
+      }
+    }
+    for (const name of ['profile', 'preferences']) {
+      const value = parsed.data[name];
+      if (value != null && (typeof value !== 'object' || Array.isArray(value))) {
+        throw new Error(`The backup's ${name} data is damaged.`);
+      }
+    }
+
+    Object.entries(STORAGE_KEYS).forEach(([name, key]) => {
+      const value = parsed.data[name.toLowerCase()];
+      if (value == null) localStorage.removeItem(key);
+      else set(key, value);
+    });
   }
 };

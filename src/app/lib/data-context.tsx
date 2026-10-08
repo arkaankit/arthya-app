@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode } from 'react';
+import { toast } from 'sonner@2.0.3';
 import { storage, Account, Asset, IncomeStream, Expense, Goal, UserProfile } from './storage';
 
 interface DataContextType {
@@ -42,8 +43,14 @@ interface DataContextType {
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
+interface Crud<T extends { id: string }> {
+  add: (item: Omit<T, 'id'>) => void;
+  update: (id: string, updates: Partial<T>) => void;
+  remove: (id: string) => void;
+}
+
 // Add/update/remove for one list, keeping React state and localStorage in sync.
-function crud<T extends { id: string }>(list: T[], setList: (v: T[]) => void, save: (v: T[]) => void) {
+function crud<T extends { id: string }>(list: T[], setList: (v: T[]) => void, save: (v: T[]) => void): Crud<T> {
   const commit = (updated: T[]) => {
     setList(updated);
     save(updated);
@@ -57,22 +64,14 @@ function crud<T extends { id: string }>(list: T[], setList: (v: T[]) => void, sa
 }
 
 export function DataProvider({ children }: { children: ReactNode }) {
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [accounts, setAccounts] = useState<Account[]>([]);
-  const [assets, setAssets] = useState<Asset[]>([]);
-  const [incomeStreams, setIncomeStreams] = useState<IncomeStream[]>([]);
-  const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [goals, setGoals] = useState<Goal[]>([]);
-
-  // Load data on mount
-  useEffect(() => {
-    setProfile(storage.getProfile());
-    setAccounts(storage.getAccounts());
-    setAssets(storage.getAssets());
-    setIncomeStreams(storage.getIncome());
-    setExpenses(storage.getExpenses());
-    setGoals(storage.getGoals());
-  }, []);
+  // Read saved data synchronously on first render. Loading it in an effect left the profile
+  // null for a moment, and App's startup code then saved a default profile over the real one.
+  const [profile, setProfile] = useState<UserProfile | null>(storage.getProfile);
+  const [accounts, setAccounts] = useState<Account[]>(storage.getAccounts);
+  const [assets, setAssets] = useState<Asset[]>(storage.getAssets);
+  const [incomeStreams, setIncomeStreams] = useState<IncomeStream[]>(storage.getIncome);
+  const [expenses, setExpenses] = useState<Expense[]>(storage.getExpenses);
+  const [goals, setGoals] = useState<Goal[]>(storage.getGoals);
 
   // Profile operations
   const updateProfile = (newProfile: UserProfile) => {
@@ -80,10 +79,39 @@ export function DataProvider({ children }: { children: ReactNode }) {
     storage.setProfile(newProfile);
   };
 
-  const acc = crud(accounts, setAccounts, storage.setAccounts);
-  const ast = crud(assets, setAssets, storage.setAssets);
-  const inc = crud(incomeStreams, setIncomeStreams, storage.setIncome);
-  const exp = crud(expenses, setExpenses, storage.setExpenses);
+  // When something is saved in a currency other than the base one, offer to switch the base.
+  // Only asks when the currency is new for that item (adding, or changing it while editing).
+  const offerBaseCurrency = (currency: string | undefined, previous?: string) => {
+    if (!profile || !currency || currency === profile.currency || currency === previous) return;
+    const base = profile.currency;
+    toast(`This is in ${currency}, but your base currency is ${base}.`, {
+      description: 'All totals are converted into the base currency.',
+      duration: 12000,
+      action: { label: `Use ${currency}`, onClick: () => {
+        updateProfile({ ...profile, currency });
+        toast.success(`Base currency changed to ${currency}`);
+      } },
+      cancel: { label: `Keep ${base}`, onClick: () => {} },
+    });
+  };
+
+  // Wraps add/update so saving an item can trigger the base-currency prompt.
+  const withCurrencyPrompt = <T extends { id: string; currency: string }>(ops: Crud<T>, list: T[]): Crud<T> => ({
+    ...ops,
+    add: (item: Omit<T, 'id'>) => {
+      ops.add(item);
+      offerBaseCurrency(item.currency);
+    },
+    update: (id: string, updates: Partial<T>) => {
+      ops.update(id, updates);
+      offerBaseCurrency(updates.currency, list.find(x => x.id === id)?.currency);
+    },
+  });
+
+  const acc = withCurrencyPrompt(crud(accounts, setAccounts, storage.setAccounts), accounts);
+  const ast = withCurrencyPrompt(crud(assets, setAssets, storage.setAssets), assets);
+  const inc = withCurrencyPrompt(crud(incomeStreams, setIncomeStreams, storage.setIncome), incomeStreams);
+  const exp = withCurrencyPrompt(crud(expenses, setExpenses, storage.setExpenses), expenses);
   const goal = crud(goals, setGoals, storage.setGoals);
 
   // Reset all data

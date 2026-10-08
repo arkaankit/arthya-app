@@ -101,8 +101,8 @@ export function AccountDialog({ open, onOpenChange, id }: AccountDialogProps) {
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-3">
-            <div className="col-span-2">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="sm:col-span-2">
               <Label htmlFor="balance">Current Balance</Label>
               <div className="relative mt-2">
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
