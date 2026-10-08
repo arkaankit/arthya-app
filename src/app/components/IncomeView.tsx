@@ -26,7 +26,7 @@ export function IncomeView() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h2 className="mb-2">Income Sources</h2>
+          <h2 className="page-title mb-2">Income Sources</h2>
           <p className="text-muted-foreground">
             Manage and track all your income streams
           </p>

@@ -35,7 +35,7 @@ export function ExpensesView() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h2 className="mb-2">Expenses</h2>
+          <h2 className="page-title mb-2">Expenses</h2>
           <p className="text-muted-foreground">
             Track and manage all your expenses
           </p>
@@ -158,11 +158,11 @@ export function ExpensesView() {
               const percentage = totalExpenses > 0 ? (categoryExpenses / totalExpenses) * 100 : 0;
 
             const categoryColors: Record<string, string> = {
-              Housing: '#F59E0B',
-              Transportation: '#FBBF24',
-              Family: '#F97316',
-              Business: '#10B981',
-              Others: '#F59E0B'
+              Housing: '#ff5e24',
+              Transportation: '#ffa47a',
+              Family: '#6c3200',
+              Business: '#5c6066',
+              Others: '#989ea4'
             };
 
             return (

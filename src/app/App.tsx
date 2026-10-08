@@ -18,6 +18,7 @@ import { SettingsView } from "./components/SettingsView";
 import { PrivacyInfoPopover } from "./components/PrivacyInfoPopover";
 import { ProfileMenu } from "./components/ProfileMenu";
 import { ArthyaLogo } from "./components/ArthyaLogo";
+import { PixelCloud } from "./components/PixelCloud";
 import { Button } from "./components/ui/button";
 import { 
   LayoutDashboard, 
@@ -35,7 +36,15 @@ import { Toaster } from "./components/ui/sonner";
 import { toast } from "sonner@2.0.3";
 import { storage } from "./lib/storage";
 
-type ViewType = 'dashboard' | 'income' | 'expenses' | 'accounts' | 'assets' | 'planning' | 'settings';
+// The "Arthya" wordmark keeps its original amber→yellow→orange colours (Tailwind's stock
+// amber-600/yellow-600/orange-600), independent of the app's remapped orange palette.
+const WORDMARK_STYLE = {
+  fontFamily: "'Eagle Lake', serif",
+  backgroundImage:
+    "linear-gradient(to right in oklab, oklch(66.6% 0.179 58.318), oklch(68.1% 0.162 75.834), oklch(64.6% 0.222 41.116))",
+};
+
+type ViewType ='dashboard' | 'income' | 'expenses' | 'accounts' | 'assets' | 'planning' | 'settings';
 
 function AppContent() {
   const { profile, updateProfile, accounts, assets, incomeStreams, expenses, resetData } = useData();
@@ -175,12 +184,12 @@ function AppContent() {
       <div className="flex min-h-screen w-full bg-background">
         {/* Overlay Menu */}
         <Sheet open={isMenuOpen} onOpenChange={setIsMenuOpen}>
-          <SheetContent side="left" className="w-[280px] p-0">
+          <SheetContent side="left" className="w-[280px] p-0 bg-card">
             <SheetHeader className="h-[76px] p-0 border-b border-border/50">
               <div className="flex items-center gap-3 px-6 h-full">
                 <ArthyaLogo size={40} />
                 <div>
-                  <SheetTitle className="bg-gradient-to-r from-amber-600 via-yellow-600 to-orange-600 bg-clip-text text-transparent" style={{ fontFamily: "'Eagle Lake', serif" }}>Arthya</SheetTitle>
+                  <SheetTitle className="bg-clip-text text-transparent" style={WORDMARK_STYLE}>Arthya</SheetTitle>
                   <SheetDescription className="text-xs text-muted-foreground">Smart Financial Planning</SheetDescription>
                 </div>
               </div>
@@ -194,10 +203,10 @@ function AppContent() {
                     setCurrentView(item.id as ViewType);
                     setIsMenuOpen(false);
                   }}
-                  className={`w-full h-[50px] flex items-center justify-start px-6 gap-3 transition-all ${
+                  className={`mx-3 my-0.5 h-11 flex items-center justify-start px-4 gap-3 rounded-md text-sm font-medium transition-colors ${
                     currentView === item.id
-                      ? 'bg-amber-100 dark:bg-amber-950/30 text-amber-900 dark:text-amber-300'
-                      : 'bg-background hover:bg-amber-50/50 dark:hover:bg-amber-950/10 text-amber-600 dark:text-amber-400'
+                      ? 'bg-accent text-orange-600 dark:text-orange-400 shadow-pressed'
+                      : 'text-foreground hover:bg-secondary'
                   }`}
                 >
                   <item.icon className="w-5 h-5 shrink-0" />
@@ -209,7 +218,7 @@ function AppContent() {
         </Sheet>
 
         <main className="flex-1 overflow-auto">
-          <div className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-10">
+          <div className="border-b border-border bg-card/90 backdrop-blur sticky top-0 z-10">
             <div className="flex items-center gap-4 px-6 py-4">
               <Button 
                 variant="ghost" 
@@ -224,12 +233,15 @@ function AppContent() {
                 <div className="flex items-center gap-3">
                   <ArthyaLogo size={40} />
                   <div>
-                    <h3 className="bg-gradient-to-r from-amber-600 via-yellow-600 to-orange-600 bg-clip-text text-transparent" style={{ fontFamily: "'Eagle Lake', serif" }}>Arthya</h3>
+                    <h3 className="bg-clip-text text-transparent" style={WORDMARK_STYLE}>Arthya</h3>
                     <p className="text-xs text-muted-foreground">Smart Financial Planning</p>
                   </div>
                 </div>
                 
-                <div className="flex-1" />
+                <div className="flex-1 hidden md:flex justify-center">
+                  <PixelCloud size={54} className="-translate-x-16 translate-y-1" />
+                </div>
+                <div className="flex-1 md:hidden" />
                 <div className="flex items-center gap-3">
                   <div className="hidden sm:flex items-center gap-2 text-sm text-muted-foreground">
                     <Shield className="w-4 h-4 text-green-600 dark:text-green-400" />
@@ -252,19 +264,19 @@ function AppContent() {
             </div>
             
             {/* Footer */}
-            <footer className="border-t border-border/50 bg-background/80 backdrop-blur-sm mt-auto">
-              <div className="max-w-[1600px] mx-auto px-6 py-4">
-                <p className="text-center text-sm text-muted-foreground flex items-center justify-center gap-1.5">
-                  Made with <Heart className="w-4 h-4 text-red-500 fill-red-500 animate-pulse" /> by{' '}
-                  <a 
-                    href="https://arkaankit.myportfolio.com/design-work" 
-                    target="_blank" 
+            <footer className="relative mt-auto overflow-hidden bg-[#6c3200]">
+              <PixelCloud size={64} className="absolute left-6 top-1/2 -translate-y-1/2 opacity-30 hidden sm:block" />
+              <PixelCloud size={44} className="absolute right-10 top-2 opacity-25 hidden sm:block" />
+              <div className="relative max-w-[1600px] mx-auto px-6 py-6">
+                <p className="text-center text-sm text-[#f5e6dc] flex items-center justify-center gap-1.5">
+                  Made with <Heart className="w-4 h-4 text-red-400 fill-red-400 animate-pulse" /> by{' '}
+                  <a
+                    href="https://arkaankit.myportfolio.com/design-work"
+                    target="_blank"
                     rel="noopener noreferrer"
-                    className="hover:opacity-80 transition-opacity"
+                    className="font-medium text-white underline-offset-4 hover:underline hover:decoration-orange-500"
                   >
-                    <span className="bg-gradient-to-r from-amber-600 via-yellow-600 to-orange-600 bg-clip-text text-transparent font-medium">
-                      Arka Ankit
-                    </span>
+                    Arka Ankit
                   </a>
                 </p>
               </div>

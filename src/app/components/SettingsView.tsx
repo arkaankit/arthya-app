@@ -102,7 +102,7 @@ export function SettingsView({ onResetData, onRestartTour }: SettingsViewProps) 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="mb-2">Settings</h2>
+        <h2 className="page-title mb-2">Settings</h2>
         <p className="text-muted-foreground">
           Manage your preferences and privacy settings
         </p>

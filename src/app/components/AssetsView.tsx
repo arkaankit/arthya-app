@@ -57,7 +57,7 @@ export function AssetsView() {
       {/* Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h2 className="mb-2">Assets</h2>
+          <h2 className="page-title mb-2">Assets</h2>
           <p className="text-muted-foreground">
             Manage properties, vehicles, and other assets with income and expenses
           </p>

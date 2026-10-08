@@ -1,81 +1,133 @@
 @custom-variant dark (&:is(.dark *));
 
+/* Obscura design system: cloud-mist canvas, white paper cards, one Signal Orange accent. */
 :root {
   --font-size: 16px;
-  --background: #ffffff;
-  --foreground: oklch(0.145 0 0);
+  --background: #e3f1fe; /* Cloud Mist */
+  --foreground: #232629; /* Graphite Ink */
   --card: #ffffff;
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: #030213;
-  --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.95 0.0058 264.53);
-  --secondary-foreground: #030213;
-  --muted: #ececf0;
-  --muted-foreground: #717182;
-  --accent: #e9ebef;
-  --accent-foreground: #030213;
+  --card-foreground: #232629;
+  --popover: #ffffff;
+  --popover-foreground: #232629;
+  --primary: #ff5e24; /* Signal Orange */
+  --primary-foreground: #ffffff;
+  --secondary: #e3f1fe;
+  --secondary-foreground: #232629;
+  --muted: #eef5fc;
+  --muted-foreground: #5c6066; /* Slate Pencil */
+  --accent: #fff1ea;
+  --accent-foreground: #232629;
   --destructive: #d4183d;
   --destructive-foreground: #ffffff;
-  --border: rgba(0, 0, 0, 0.1);
+  --border: #d6e7f7;
   --input: transparent;
-  --input-background: #f3f3f5;
-  --switch-background: #cbced4;
+  --input-background: #f5f9fd;
+  --switch-background: #cbd5df;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.765 0.15 75);
-  --chart-2: oklch(0.828 0.189 84.429);
-  --chart-3: oklch(0.646 0.222 41.116);
-  --chart-4: oklch(0.69 0.18 65);
-  --chart-5: oklch(0.72 0.16 55);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.65 0.15 70);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --ring: #ff5e24;
+  --chart-1: #ff5e24;
+  --chart-2: oklch(0.83 0.13 41);
+  --chart-3: #6c3200;
+  --chart-4: #5c6066;
+  --chart-5: #989ea4;
+  --radius: 0.5rem; /* sm 4px, md 6px (buttons/inputs), xl 12px (cards) */
+  --sidebar: #ffffff;
+  --sidebar-foreground: #232629;
+  --sidebar-primary: #ff5e24;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e3f1fe;
+  --sidebar-accent-foreground: #232629;
+  --sidebar-border: #d6e7f7;
+  --sidebar-ring: #ff5e24;
+  --cloud-outline: #5c6066;
+  --cloud-fill: #ffffff;
+  --cloud-shade: #cfe3f7;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
+  --background: #141618;
+  --foreground: #eef1f4;
+  --card: #1d2023;
+  --card-foreground: #eef1f4;
+  --popover: #1d2023;
+  --popover-foreground: #eef1f4;
+  --primary: #ff5e24;
+  --primary-foreground: #ffffff;
+  --secondary: #26292d;
+  --secondary-foreground: #eef1f4;
+  --muted: #26292d;
+  --muted-foreground: #989ea4; /* Ash Mist */
+  --accent: #2b221d;
+  --accent-foreground: #eef1f4;
   --destructive: oklch(0.396 0.141 25.723);
   --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
+  --border: #2e3236;
+  --input: #2e3236;
+  --input-background: #26292d;
+  --ring: #ff5e24;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
-  --chart-1: oklch(0.765 0.15 75);
-  --chart-2: oklch(0.828 0.189 84.429);
-  --chart-3: oklch(0.646 0.222 41.116);
-  --chart-4: oklch(0.69 0.18 65);
-  --chart-5: oklch(0.72 0.16 55);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.765 0.15 75);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.269 0 0);
-  --sidebar-ring: oklch(0.439 0 0);
+  --chart-1: #ff5e24;
+  --chart-2: oklch(0.83 0.13 41);
+  --chart-3: oklch(0.62 0.12 50);
+  --chart-4: #989ea4;
+  --chart-5: #5c6066;
+  --sidebar: #1d2023;
+  --sidebar-foreground: #eef1f4;
+  --sidebar-primary: #ff5e24;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #26292d;
+  --sidebar-accent-foreground: #eef1f4;
+  --sidebar-border: #2e3236;
+  --sidebar-ring: #ff5e24;
+  --cloud-outline: #5c6066;
+  --cloud-fill: #2a2e33;
+  --cloud-shade: #22262a;
+}
+
+/* Every amber/yellow/orange utility in the app now resolves to the Signal Orange scale,
+   so the views follow the one-accent rule without per-file edits. */
+@theme {
+  --color-orange-50: oklch(0.975 0.015 45);
+  --color-orange-100: oklch(0.945 0.04 45);
+  --color-orange-200: oklch(0.895 0.08 43);
+  --color-orange-300: oklch(0.83 0.13 41);
+  --color-orange-400: oklch(0.76 0.18 39);
+  --color-orange-500: #ff5e24;
+  --color-orange-600: oklch(0.62 0.2 37);
+  --color-orange-700: oklch(0.54 0.17 40);
+  --color-orange-800: oklch(0.46 0.13 45);
+  --color-orange-900: #6c3200;
+  --color-orange-950: oklch(0.27 0.07 50);
+  --color-amber-50: var(--color-orange-50);
+  --color-amber-100: var(--color-orange-100);
+  --color-amber-200: var(--color-orange-200);
+  --color-amber-300: var(--color-orange-300);
+  --color-amber-400: var(--color-orange-400);
+  --color-amber-500: var(--color-orange-500);
+  --color-amber-600: var(--color-orange-600);
+  --color-amber-700: var(--color-orange-700);
+  --color-amber-800: var(--color-orange-800);
+  --color-amber-900: var(--color-orange-900);
+  --color-amber-950: var(--color-orange-950);
+  --color-yellow-50: var(--color-orange-50);
+  --color-yellow-100: var(--color-orange-100);
+  --color-yellow-200: var(--color-orange-200);
+  --color-yellow-300: var(--color-orange-300);
+  --color-yellow-400: var(--color-orange-400);
+  --color-yellow-500: var(--color-orange-500);
+  --color-yellow-600: var(--color-orange-600);
+  --color-yellow-700: var(--color-orange-700);
+  --color-yellow-800: var(--color-orange-800);
+  --color-yellow-900: var(--color-orange-900);
+  --color-yellow-950: var(--color-orange-950);
+
+  --font-sans: 'Manrope', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-pixel: 'Jersey 10', 'Pixelify Sans', ui-sans-serif, system-ui, sans-serif;
+
+  --shadow-card: rgba(15, 34, 52, 0.01) 0px 27px 11px 0px, rgba(15, 34, 52, 0.02) 0px 15px 9px 0px, rgba(15, 34, 52, 0.04) 0px 7px 7px 0px, rgba(15, 34, 52, 0.04) 0px 2px 4px 0px;
+  --shadow-pressed: rgba(255, 94, 36, 0.17) 0px 0.5px 0.5px 0.5px inset, rgba(153, 37, 18, 0.2) 0px -1px 0.5px 0px inset, rgb(255, 94, 36) 0px 0px 0px 1px;
 }
 
 @theme inline {
@@ -126,6 +178,12 @@
 
   body {
     @apply bg-background text-foreground;
+  }
+
+  /* Cards are always white paper; tailwind-merge drops bg-card when a card also gets a
+     bg-gradient-* class, so the base color lives here and gradients tint on top of it. */
+  [data-slot="card"] {
+    background-color: var(--card);
   }
 }
 
@@ -186,4 +244,13 @@
 
 html {
   font-size: var(--font-size);
+}
+
+/* Page titles: Jersey 10 at 36px, the only place the pixel font appears. */
+.page-title {
+  font-family: var(--font-pixel);
+  font-size: 2.25rem;
+  font-weight: 400;
+  line-height: 1.11;
+  letter-spacing: -0.9px;
 }
