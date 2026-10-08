@@ -3,7 +3,6 @@ import { AccountCard } from "./AccountCard";
 import { AccountDialog } from "./AccountDialog";
 import { PrimaryButton } from "./PrimaryButton";
 import { Card } from "./ui/card";
-import { Button } from "./ui/button";
 import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Alert, AlertDescription } from "./ui/alert";
@@ -190,13 +189,10 @@ export function AccountsView() {
           </div>
           <div>
             <h4 className="mb-2">Privacy-First Account Management</h4>
-            <p className="text-sm text-muted-foreground mb-3">
-              All accounts shown are dummy data for simulation purposes. You can add real or 
-              simulated accounts to plan your finances without compromising your privacy.
+            <p className="text-sm text-muted-foreground">
+              Your accounts are stored only in this browser and never sent to a server. Track your
+              real accounts, or add simulated ones to plan without sharing actual figures.
             </p>
-            <Button variant="outline" size="sm">
-              Learn More
-            </Button>
           </div>
         </div>
       </Card>
