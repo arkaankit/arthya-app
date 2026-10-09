@@ -27,6 +27,7 @@ export interface GameState {
   ledger: Award[];
   saves: SaveRecord[]; // newest first, at most 10 (dates and names only, never the files)
   calm: boolean;
+  reminderSnoozedUntil: string | null; // ISO time; the dark-crystal reminder stays hidden until then
 }
 
 export const DEFAULT_GAME: GameState = {
@@ -36,6 +37,7 @@ export const DEFAULT_GAME: GameState = {
   ledger: [],
   saves: [],
   calm: false,
+  reminderSnoozedUntil: null,
 };
 
 // What the rules look at. Built from the app's data, never from button presses.
@@ -68,21 +70,66 @@ export function newSetupAwards(facts: GameFacts, ledger: Award[], now: Date = ne
     .map(q => ({ id: q.id, xp: q.xp, at: now.toISOString() }));
 }
 
+// --- Save points -----------------------------------------------------------------------------
+
+export const MONTHLY_SAVE_XP = 40;
+const MONTHLY_SAVE = /^monthly\.save@(\d{4}-\d{2})$/;
+const DAY = 24 * 60 * 60 * 1000;
+
+const monthOf = (iso: string) => iso.slice(0, 7); // 'YYYY-MM'
+
+// The monthly save award for `now`, or null. Rules (study, Save points and Loophole review):
+// one per calendar month; never for the very first save (that is the setup quest); the month must
+// be later than the last awarded one; and nothing is awarded while the clock reads earlier than
+// the newest award (a clock moved backwards pauses awards until real time catches up).
+export function monthlySaveAward(saves: SaveRecord[], ledger: Award[], now: Date = new Date()): Award | null {
+  const nowIso = now.toISOString();
+  const month = monthOf(nowIso);
+  if (ledger.some(a => a.at > nowIso)) return null;
+  const savesThisMonth = saves.filter(s => monthOf(s.at) === month).length;
+  const isOnlyEverSave = saves.length === 1;
+  if (savesThisMonth === 0 || isOnlyEverSave) return null;
+  const lastMonth = ledger
+    .map(a => MONTHLY_SAVE.exec(a.id)?.[1])
+    .filter((m): m is string => !!m)
+    .sort()
+    .pop();
+  if (lastMonth && lastMonth >= month) return null;
+  return { id: `monthly.save@${month}`, xp: MONTHLY_SAVE_XP, at: nowIso };
+}
+
+export type CrystalState = 'glowing' | 'fading' | 'dark';
+
+// Glowing 0 to 7 days after the last save, fading until day 30, dark after that or if never saved.
+export function crystalState(saves: SaveRecord[], now: Date = new Date()): { state: CrystalState; days: number | null } {
+  if (saves.length === 0) return { state: 'dark', days: null };
+  const days = Math.max(0, Math.floor((now.getTime() - Date.parse(saves[0].at)) / DAY));
+  return { state: days <= 7 ? 'glowing' : days <= 30 ? 'fading' : 'dark', days };
+}
+
+// --- Ledger hygiene ---------------------------------------------------------------------------
+
+function officialXp(id: string): number | null {
+  if (MONTHLY_SAVE.test(id)) return MONTHLY_SAVE_XP;
+  return SETUP_QUESTS.find(q => q.id === id)?.xp ?? null;
+}
+
 // Cleans a ledger read from storage or a backup: drops unknown or repeated ids and replaces each
 // award's XP with the official value, so editing a save file cannot inflate XP.
 export function sanitizeLedger(ledger: Award[]): Award[] {
   const seen = new Set<string>();
   const out: Award[] = [];
   for (const a of ledger) {
-    const quest = SETUP_QUESTS.find(q => q.id === a.id);
-    if (!quest || seen.has(a.id)) continue;
+    const xp = officialXp(a.id);
+    if (xp === null || seen.has(a.id)) continue;
     seen.add(a.id);
-    out.push({ id: a.id, xp: quest.xp, at: a.at });
+    out.push({ id: a.id, xp, at: a.at });
   }
   return out;
 }
 
 export function questTitle(id: string): string {
+  if (MONTHLY_SAVE.test(id)) return 'Monthly save';
   return SETUP_QUESTS.find(q => q.id === id)?.title ?? id;
 }
 

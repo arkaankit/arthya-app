@@ -6,18 +6,19 @@ import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import { Globe, Sparkles, Camera, Edit2, Check, X, Download, Upload, HardDriveDownload } from "lucide-react";
+import { Globe, Sparkles, Camera, Edit2, Check, X, HardDriveDownload } from "lucide-react";
 import { useData } from "../lib/data-context";
-import { storage } from "../lib/storage";
+
 import { CURRENCIES } from "../lib/currency";
 import { toast } from "sonner@2.0.3";
 
 interface SettingsViewProps {
   onResetData: () => void;
+  onOpenSaves: () => void;
 }
 
-export function SettingsView({ onResetData }: SettingsViewProps) {
-  const { profile, updateProfile, downloadBackup, replayOnboarding } = useData();
+export function SettingsView({ onResetData, onOpenSaves }: SettingsViewProps) {
+  const { profile, updateProfile, replayOnboarding } = useData();
   const [selectedCurrency, setSelectedCurrency] = useState(profile?.currency || "USD");
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [editedProfile, setEditedProfile] = useState({
@@ -29,7 +30,7 @@ export function SettingsView({ onResetData }: SettingsViewProps) {
     avatar: profile?.avatar || ''
   });
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const backupInputRef = useRef<HTMLInputElement>(null);
+
 
   const handleCurrencyChange = (newCurrency: string) => {
     setSelectedCurrency(newCurrency);
@@ -89,22 +90,6 @@ export function SettingsView({ onResetData }: SettingsViewProps) {
       avatar: profile?.avatar || ''
     });
     setIsEditingProfile(false);
-  };
-
-  const handleRestoreBackup = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    event.target.value = ''; // allow choosing the same file again
-    if (!file) return;
-    if (!confirm('Restoring replaces ALL your current data with the backup. Continue?')) return;
-
-    try {
-      storage.importBackup(await file.text());
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Could not restore this backup.');
-      return;
-    }
-    // Reload so every screen (and the theme preference) picks up the restored data.
-    window.location.reload();
   };
 
   const getInitials = (name: string) => {
@@ -339,28 +324,15 @@ export function SettingsView({ onResetData }: SettingsViewProps) {
               <HardDriveDownload className="w-6 h-6 text-orange-600 dark:text-orange-400" />
             </div>
             <div className="flex-1">
-              <h4 className="mb-2">Backup & Restore</h4>
+              <h4 className="mb-2">Save & Load</h4>
               <p className="text-sm text-muted-foreground mb-4">
-                Your data lives only in this browser. Download a backup file to keep it safe or to
-                move it to another device, then restore it there.
+                Your data lives only in this browser. Save a backup file to keep it safe or to
+                move it to another device, then load it there.
               </p>
-              <div className="flex flex-wrap gap-2">
-                <Button variant="outline" size="sm" onClick={downloadBackup} className="gap-2">
-                  <Download className="w-4 h-4" />
-                  Download Backup
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => backupInputRef.current?.click()} className="gap-2">
-                  <Upload className="w-4 h-4" />
-                  Restore from Backup
-                </Button>
-                <input
-                  ref={backupInputRef}
-                  type="file"
-                  accept="application/json,.json"
-                  className="hidden"
-                  onChange={handleRestoreBackup}
-                />
-              </div>
+              <Button variant="outline" size="sm" onClick={onOpenSaves} className="gap-2">
+                <HardDriveDownload className="w-4 h-4" />
+                Open Save & Load
+              </Button>
             </div>
           </div>
         </div>

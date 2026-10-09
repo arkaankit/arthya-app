@@ -47,3 +47,5 @@ export const CLOUD_PALETTE: Palette = { o: 'var(--cloud-outline)', w: 'var(--clo
 export const CRYSTAL: SpriteRows = ['....o....', '...owo...', '..owcco..', '.owcccco.', 'owcccccso', '.occccso.', '..occso..', '...oso...', '....o....'];
 export const CRYSTAL_LIT: Palette = { o: '#6c3200', w: '#ffffff', c: '#ff8a5c', s: '#ff5e24' };
 export const CRYSTAL_DIM: Palette = { o: '#5c6066', w: '#ffffff', c: '#c9d3dc', s: '#989ea4' };
+export const CRYSTAL_DARK: Palette = { o: '#232629', w: '#989ea4', c: '#5c6066', s: '#3a3d41' };
+export const CRYSTAL_BY_STATE = { glowing: CRYSTAL_LIT, fading: CRYSTAL_DIM, dark: CRYSTAL_DARK } as const;
