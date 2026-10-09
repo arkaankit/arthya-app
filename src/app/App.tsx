@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import {
   Sheet,
   SheetContent,
@@ -7,7 +7,7 @@ import {
   SheetDescription,
 } from "./components/ui/sheet";
 import { DataProvider, useData } from "./lib/data-context";
-import { GuidedTour } from "./components/GuidedTour";
+import { Onboarding } from "./components/Onboarding";
 import { DashboardView } from "./components/DashboardView";
 import { IncomeView } from "./components/IncomeView";
 import { ExpensesView } from "./components/ExpensesView";
@@ -18,7 +18,8 @@ import { SettingsView } from "./components/SettingsView";
 import { PrivacyInfoPopover } from "./components/PrivacyInfoPopover";
 import { ProfileMenu } from "./components/ProfileMenu";
 import { ArthyaLogo } from "./components/ArthyaLogo";
-import { PixelCloud } from "./components/PixelCloud";
+import { PixelSprite } from "./components/PixelSprite";
+import { CLOUD, CLOUD_PALETTE } from "./lib/sprites";
 import { Button } from "./components/ui/button";
 import { 
   LayoutDashboard, 
@@ -47,21 +48,12 @@ const WORDMARK_STYLE = {
 type ViewType ='dashboard' | 'income' | 'expenses' | 'accounts' | 'assets' | 'planning' | 'settings';
 
 function AppContent() {
-  const { profile, updateProfile, accounts, assets, incomeStreams, expenses, resetData } = useData();
+  const { profile, updateProfile, resetData, game } = useData();
   const [currentView, setCurrentView] = useState<ViewType>('dashboard');
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
-  const [showTourManually, setShowTourManually] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  
-  // Use ref to track previous counts to avoid infinite loops
-  const previousDataCountsRef = useRef({
-    accounts: 0,
-    assets: 0,
-    income: 0,
-    expenses: 0
-  });
-  
+
   // Initialize default profile on first launch
   useEffect(() => {
     if (isInitialized) return;
@@ -97,55 +89,10 @@ function AppContent() {
   const handleResetData = () => {
     if (confirm('Are you sure you want to reset all data? This action cannot be undone.')) {
       resetData();
-      localStorage.removeItem('guidedTourDismissed');
-      setShowTourManually(false);
-      toast.success('All data has been reset. Guided tour will restart.');
+      setCurrentView('dashboard');
+      toast.success('All data has been reset.');
     }
   };
-
-  const handleRestartTour = () => {
-    localStorage.removeItem('guidedTourDismissed');
-    setCurrentView('dashboard');
-    // Small delay to ensure navigation happens first
-    setTimeout(() => {
-      setShowTourManually(true);
-      toast.success('Guided tour restarted!');
-    }, 100);
-  };
-
-  // Auto-navigate back to dashboard when user completes a tour step
-  useEffect(() => {
-    if (!isInitialized) return;
-
-    const currentCounts = {
-      accounts: accounts.length,
-      assets: assets.length,
-      income: incomeStreams.length,
-      expenses: expenses.length
-    };
-
-    const previousCounts = previousDataCountsRef.current;
-
-    // Check if any data was added (count increased)
-    const accountAdded = currentCounts.accounts > previousCounts.accounts;
-    const assetAdded = currentCounts.assets > previousCounts.assets;
-    const incomeAdded = currentCounts.income > previousCounts.income;
-    const expenseAdded = currentCounts.expenses > previousCounts.expenses;
-
-    // If user added something and is not on dashboard, navigate back
-    if ((accountAdded || assetAdded || incomeAdded || expenseAdded) && currentView !== 'dashboard') {
-      // Check if tour is active (not dismissed)
-      const tourDismissed = localStorage.getItem('guidedTourDismissed');
-      if (tourDismissed !== 'true') {
-        setTimeout(() => {
-          setCurrentView('dashboard');
-        }, 500); // Small delay to let the user see the success message
-      }
-    }
-
-    // Update previous counts ref
-    previousDataCountsRef.current = currentCounts;
-  }, [accounts.length, assets.length, incomeStreams.length, expenses.length, currentView, isInitialized]);
 
 
   const navigationItems = [
@@ -173,7 +120,7 @@ function AppContent() {
       case 'planning':
         return <PlanningView />;
       case 'settings':
-        return <SettingsView onResetData={handleResetData} onRestartTour={handleRestartTour} />;
+        return <SettingsView onResetData={handleResetData} />;
       default:
         return <DashboardView />;
     }
@@ -239,7 +186,7 @@ function AppContent() {
                 </div>
                 
                 <div className="flex-1 hidden md:flex justify-center">
-                  <PixelCloud size={54} className="-translate-x-16 translate-y-1" />
+                  <PixelSprite rows={CLOUD} palette={CLOUD_PALETTE} size={54} className="-translate-x-16 translate-y-1" />
                 </div>
                 <div className="flex-1 md:hidden" />
                 <div className="flex items-center gap-3">
@@ -265,8 +212,8 @@ function AppContent() {
             
             {/* Footer */}
             <footer className="relative mt-auto overflow-hidden bg-[#6c3200]">
-              <PixelCloud size={64} className="absolute left-6 top-1/2 -translate-y-1/2 opacity-30 hidden sm:block" />
-              <PixelCloud size={44} className="absolute right-10 top-2 opacity-25 hidden sm:block" />
+              <PixelSprite rows={CLOUD} palette={CLOUD_PALETTE} size={64} className="absolute left-6 top-1/2 -translate-y-1/2 opacity-30 hidden sm:block" />
+              <PixelSprite rows={CLOUD} palette={CLOUD_PALETTE} size={44} className="absolute right-10 top-2 opacity-25 hidden sm:block" />
               <div className="relative max-w-[1600px] mx-auto px-6 py-6">
                 <p className="text-center text-sm text-[#f5e6dc] flex items-center justify-center gap-1.5">
                   Made with <Heart className="w-4 h-4 text-red-400 fill-red-400 animate-pulse" /> by{' '}
@@ -284,17 +231,8 @@ function AppContent() {
           </main>
         </div>
       
-      {/* Guided Tour Overlay */}
-      <GuidedTour
-        currentView={currentView}
-        onNavigate={(view) => setCurrentView(view as ViewType)}
-        hasAccounts={accounts.length > 0}
-        hasAssets={assets.length > 0}
-        hasIncome={incomeStreams.length > 0}
-        hasExpenses={expenses.length > 0}
-        forceShow={showTourManually}
-      />
-      
+      {!game.onboarded && <Onboarding />}
+
       <Toaster position="top-right" />
     </>
   );

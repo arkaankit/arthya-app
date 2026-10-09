@@ -14,11 +14,10 @@ import { toast } from "sonner@2.0.3";
 
 interface SettingsViewProps {
   onResetData: () => void;
-  onRestartTour: () => void;
 }
 
-export function SettingsView({ onResetData, onRestartTour }: SettingsViewProps) {
-  const { profile, updateProfile } = useData();
+export function SettingsView({ onResetData }: SettingsViewProps) {
+  const { profile, updateProfile, downloadBackup, replayOnboarding } = useData();
   const [selectedCurrency, setSelectedCurrency] = useState(profile?.currency || "USD");
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [editedProfile, setEditedProfile] = useState({
@@ -90,17 +89,6 @@ export function SettingsView({ onResetData, onRestartTour }: SettingsViewProps) 
       avatar: profile?.avatar || ''
     });
     setIsEditingProfile(false);
-  };
-
-  const handleDownloadBackup = () => {
-    const blob = new Blob([storage.exportBackup()], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `arthya-backup-${new Date().toISOString().slice(0, 10)}.json`;
-    link.click();
-    URL.revokeObjectURL(url);
-    toast.success('Backup downloaded. Keep the file somewhere safe.');
   };
 
   const handleRestoreBackup = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -325,20 +313,20 @@ export function SettingsView({ onResetData, onRestartTour }: SettingsViewProps) 
           </div>
         </div>
 
-        {/* Guided Tour */}
+        {/* Replay setup */}
         <div className="p-4 sm:p-6 bg-card border border-border rounded-xl shadow-card">
           <div className="flex items-start gap-4">
             <div className="p-3 rounded-xl bg-gradient-to-br from-yellow-500/10 to-orange-500/10 shadow-sm shadow-yellow-500/10">
               <Sparkles className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
             </div>
             <div className="flex-1">
-              <h4 className="mb-2">Guided Tour</h4>
+              <h4 className="mb-2">Player & setup</h4>
               <p className="text-sm text-muted-foreground mb-4">
-                Need a refresher? Restart the guided tour to learn how to use Arthya's features step by step.
+                Change your creature, name or home currency by replaying the welcome setup. Quests you already finished stay finished.
               </p>
-              <Button variant="outline" size="sm" onClick={onRestartTour} className="gap-2">
+              <Button variant="outline" size="sm" onClick={replayOnboarding} className="gap-2">
                 <Sparkles className="w-4 h-4" />
-                Restart Guided Tour
+                Replay setup
               </Button>
             </div>
           </div>
@@ -357,7 +345,7 @@ export function SettingsView({ onResetData, onRestartTour }: SettingsViewProps) 
                 move it to another device, then restore it there.
               </p>
               <div className="flex flex-wrap gap-2">
-                <Button variant="outline" size="sm" onClick={handleDownloadBackup} className="gap-2">
+                <Button variant="outline" size="sm" onClick={downloadBackup} className="gap-2">
                   <Download className="w-4 h-4" />
                   Download Backup
                 </Button>

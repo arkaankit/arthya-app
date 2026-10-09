@@ -5,6 +5,8 @@
  * All data is stored locally in the browser's localStorage for privacy.
  */
 
+import { DEFAULT_GAME, sanitizeLedger, type GameState } from './game.ts';
+
 /**
  * Account Interface
  * Represents a bank account or investment account
@@ -121,6 +123,7 @@ const STORAGE_KEYS = {
   GOALS: 'financeflow_goals',
   PROFILE: 'financeflow_profile',
   PREFERENCES: 'financeflow_preferences',
+  GAME: 'financeflow_game',
 };
 
 /**
@@ -151,6 +154,11 @@ export const storage = {
   setProfile: (profile: UserProfile) => set(STORAGE_KEYS.PROFILE, profile),
   getPreferences: () => get<UserPreferences>(STORAGE_KEYS.PREFERENCES, { isDarkMode: false }),
   setPreferences: (preferences: UserPreferences) => set(STORAGE_KEYS.PREFERENCES, preferences),
+  getGame: (): GameState => {
+    const game = { ...DEFAULT_GAME, ...get<Partial<GameState>>(STORAGE_KEYS.GAME, {}) };
+    return { ...game, ledger: sanitizeLedger(game.ledger) };
+  },
+  setGame: (game: GameState) => set(STORAGE_KEYS.GAME, game),
 
   // Clear all data
   clearAll: () => {
@@ -183,11 +191,15 @@ export const storage = {
         throw new Error(`The backup's ${name} data is damaged.`);
       }
     }
-    for (const name of ['profile', 'preferences']) {
+    for (const name of ['profile', 'preferences', 'game']) {
       const value = parsed.data[name];
       if (value != null && (typeof value !== 'object' || Array.isArray(value))) {
         throw new Error(`The backup's ${name} data is damaged.`);
       }
+    }
+    const ledger = parsed.data.game?.ledger ?? [];
+    if (!Array.isArray(ledger) || ledger.some((a: any) => typeof a?.id !== 'string' || typeof a?.xp !== 'number')) {
+      throw new Error("The backup's game data is damaged.");
     }
 
     Object.entries(STORAGE_KEYS).forEach(([name, key]) => {
