@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { toast } from 'sonner@2.0.3';
 import { storage, Account, Asset, IncomeStream, Expense, Goal, UserProfile } from './storage';
-import { DEFAULT_GAME, newSetupAwards, questTitle, totalXp, type GameState, type Player } from './game';
+import { DEFAULT_GAME, monthlySaveAward, newSetupAwards, questTitle, totalXp, type GameState, type Player } from './game';
 
 interface DataContextType {
   // Profile
@@ -46,6 +46,7 @@ interface DataContextType {
   finishOnboarding: () => void;
   replayOnboarding: () => void;
   downloadBackup: () => void;
+  snoozeSaveReminder: () => void;
 
   // Utilities
   resetData: () => void;
@@ -101,6 +102,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
       linkedItems: [...incomeStreams, ...expenses].filter(item => item.accountId).length,
       saves: game.saves.length,
     }, game.ledger);
+    const monthly = monthlySaveAward(game.saves, [...game.ledger, ...awards]);
+    if (monthly) awards.push(monthly);
     if (awards.length === 0) return;
     saveGame({ ...game, ledger: [...game.ledger, ...awards] });
     if (game.calm) return;
@@ -209,6 +212,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         finishOnboarding: () => saveGame({ ...game, onboarded: true }),
         replayOnboarding: () => saveGame({ ...game, onboarded: false }),
         downloadBackup,
+        snoozeSaveReminder: () =>
+          saveGame({ ...game, reminderSnoozedUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() }),
         resetData,
       }}
     >

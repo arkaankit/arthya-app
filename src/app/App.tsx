@@ -19,7 +19,9 @@ import { PrivacyInfoPopover } from "./components/PrivacyInfoPopover";
 import { ProfileMenu } from "./components/ProfileMenu";
 import { ArthyaLogo } from "./components/ArthyaLogo";
 import { PixelSprite } from "./components/PixelSprite";
-import { CLOUD, CLOUD_PALETTE } from "./lib/sprites";
+import { CLOUD, CLOUD_PALETTE, CRYSTAL, CRYSTAL_BY_STATE } from "./lib/sprites";
+import { crystalState } from "./lib/game";
+import { SaveLoadView, SaveReminder, savedAgo } from "./components/SaveLoadView";
 import { Button } from "./components/ui/button";
 import { 
   LayoutDashboard, 
@@ -45,10 +47,11 @@ const WORDMARK_STYLE = {
     "linear-gradient(to right in oklab, oklch(66.6% 0.179 58.318), oklch(68.1% 0.162 75.834), oklch(64.6% 0.222 41.116))",
 };
 
-type ViewType ='dashboard' | 'income' | 'expenses' | 'accounts' | 'assets' | 'planning' | 'settings';
+type ViewType ='dashboard' | 'income' | 'expenses' | 'accounts' | 'assets' | 'planning' | 'settings' | 'saves';
 
 function AppContent() {
   const { profile, updateProfile, resetData, game } = useData();
+  const crystal = crystalState(game.saves);
   const [currentView, setCurrentView] = useState<ViewType>('dashboard');
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -120,7 +123,9 @@ function AppContent() {
       case 'planning':
         return <PlanningView />;
       case 'settings':
-        return <SettingsView onResetData={handleResetData} />;
+        return <SettingsView onResetData={handleResetData} onOpenSaves={() => setCurrentView('saves')} />;
+      case 'saves':
+        return <SaveLoadView />;
       default:
         return <DashboardView />;
     }
@@ -194,6 +199,16 @@ function AppContent() {
                     <Shield className="w-4 h-4 text-green-600 dark:text-green-400" />
                     <span>All data stored locally</span>
                   </div>
+                  {!game.calm && (
+                    <button
+                      onClick={() => setCurrentView('saves')}
+                      title={`Save & Load · ${savedAgo(crystal.days)}`}
+                      aria-label={`Save and load. ${savedAgo(crystal.days)}`}
+                      className="h-9 w-9 flex items-center justify-center rounded-md hover:bg-secondary transition-colors"
+                    >
+                      <PixelSprite rows={CRYSTAL} palette={CRYSTAL_BY_STATE[crystal.state]} size={20} />
+                    </button>
+                  )}
                   <PrivacyInfoPopover />
                   <ProfileMenu 
                     onNavigateToSettings={() => setCurrentView('settings')}
@@ -206,6 +221,7 @@ function AppContent() {
 
             <div className="flex-1 p-4 sm:p-6 lg:p-8">
               <div className="max-w-[1600px] mx-auto">
+                {currentView === 'dashboard' && <SaveReminder onOpen={() => setCurrentView('saves')} />}
                 {renderView()}
               </div>
             </div>
