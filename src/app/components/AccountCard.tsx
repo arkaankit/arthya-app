@@ -3,6 +3,8 @@ import { Card } from "./ui/card";
 import { Button } from "./ui/button";
 import { Building2, TrendingUp, Trash2, Pencil } from "lucide-react";
 import { useData } from "../lib/data-context";
+import { accountFlows } from "../lib/flows";
+import { formatCurrency } from "../lib/currency";
 import { AccountDialog } from "./AccountDialog";
 import { toast } from "sonner@2.0.3";
 
@@ -16,7 +18,8 @@ interface AccountCardProps {
 }
 
 export function AccountCard({ id, name, balance, currency, type, color }: AccountCardProps) {
-  const { deleteAccount } = useData();
+  const { deleteAccount, incomeStreams, expenses } = useData();
+  const flow = accountFlows([{ id, currency }], incomeStreams, expenses)[id];
   const [showEditDialog, setShowEditDialog] = useState(false);
 
   const handleDelete = (e: React.MouseEvent) => {
@@ -83,6 +86,26 @@ export function AccountCard({ id, name, balance, currency, type, color }: Accoun
         <p className="text-muted-foreground">
           <span className="text-2xl" style={{ color }}>{currency} {balance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
         </p>
+        <div className="mt-4 pt-3 border-t border-border/60 text-sm">
+          {flow.in === 0 && flow.out === 0 ? (
+            <p className="text-muted-foreground">No income or expenses linked yet</p>
+          ) : (
+            <div className="grid grid-cols-3 gap-2">
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground">In / month</p>
+                <p className="font-semibold text-green-600 dark:text-green-400 truncate">+{formatCurrency(flow.in, currency, { decimals: 0 })}</p>
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground">Out / month</p>
+                <p className="font-semibold text-red-600 dark:text-red-400 truncate">−{formatCurrency(flow.out, currency, { decimals: 0 })}</p>
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs text-muted-foreground">Net</p>
+                <p className="font-semibold truncate">{flow.net >= 0 ? '+' : '−'}{formatCurrency(Math.abs(flow.net), currency, { decimals: 0 })}</p>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </Card>
     </>

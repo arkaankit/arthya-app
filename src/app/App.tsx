@@ -22,6 +22,7 @@ import { PixelSprite } from "./components/PixelSprite";
 import { CLOUD, CLOUD_PALETTE, CRYSTAL, CRYSTAL_BY_STATE } from "./lib/sprites";
 import { crystalState } from "./lib/game";
 import { SaveLoadView, SaveReminder, savedAgo } from "./components/SaveLoadView";
+import { ProfileView } from "./components/ProfileView";
 import { Button } from "./components/ui/button";
 import { 
   LayoutDashboard, 
@@ -47,7 +48,7 @@ const WORDMARK_STYLE = {
     "linear-gradient(to right in oklab, oklch(66.6% 0.179 58.318), oklch(68.1% 0.162 75.834), oklch(64.6% 0.222 41.116))",
 };
 
-type ViewType ='dashboard' | 'income' | 'expenses' | 'accounts' | 'assets' | 'planning' | 'settings' | 'saves';
+type ViewType ='dashboard' | 'income' | 'expenses' | 'accounts' | 'assets' | 'planning' | 'settings' | 'saves' | 'profile';
 
 function AppContent() {
   const { profile, updateProfile, resetData, game } = useData();
@@ -126,6 +127,8 @@ function AppContent() {
         return <SettingsView onResetData={handleResetData} onOpenSaves={() => setCurrentView('saves')} />;
       case 'saves':
         return <SaveLoadView />;
+      case 'profile':
+        return <ProfileView onOpenSaves={() => setCurrentView('saves')} />;
       default:
         return <DashboardView />;
     }
@@ -212,6 +215,7 @@ function AppContent() {
                   <PrivacyInfoPopover />
                   <ProfileMenu 
                     onNavigateToSettings={() => setCurrentView('settings')}
+                    onNavigateToProfile={() => setCurrentView('profile')}
                     isDarkMode={isDarkMode}
                     onToggleDarkMode={toggleDarkMode}
                   />

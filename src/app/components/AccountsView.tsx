@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { AccountCard } from "./AccountCard";
 import { AccountDialog } from "./AccountDialog";
+import { UnlinkedItems } from "./UnlinkedItems";
 import { PrimaryButton } from "./PrimaryButton";
 import { Card } from "./ui/card";
 import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
@@ -141,6 +142,8 @@ export function AccountsView() {
           <AccountCard key={account.id} {...account} />
         ))}
       </div>
+
+      <UnlinkedItems />
 
       {/* Account Distribution */}
       {accounts.length > 0 && (

@@ -18,6 +18,7 @@ export interface Account {
   balance: number;
   currency: string; // ISO currency code (USD, EUR, etc.)
   color: string; // Hex color for visual identification
+  reviewedAt?: string; // ISO time the balance was last saved (confirmed); used by the monthly review
 }
 
 /**
