@@ -224,6 +224,22 @@ export function DataProvider({ children }: { children: ReactNode }) {
     ...accOps,
     add: item => accOps.add({ ...item, reviewedAt: new Date().toISOString() }),
     update: (id, updates) => accOps.update(id, { ...updates, reviewedAt: new Date().toISOString() }),
+    // Deleting an account unlinks its income and expenses, so nothing points at a missing account.
+    remove: id => {
+      accOps.remove(id);
+      const unlink = <T extends { accountId?: string }>(list: T[]) =>
+        list.map(x => (x.accountId === id ? { ...x, accountId: undefined } : x));
+      if (incomeStreams.some(x => x.accountId === id)) {
+        const next = unlink(incomeStreams);
+        setIncomeStreams(next);
+        storage.setIncome(next);
+      }
+      if (expenses.some(x => x.accountId === id)) {
+        const next = unlink(expenses);
+        setExpenses(next);
+        storage.setExpenses(next);
+      }
+    },
   };
   const ast = withCurrencyPrompt(crud(assets, setAssets, storage.setAssets), assets);
   const inc = withCurrencyPrompt(crud(incomeStreams, setIncomeStreams, storage.setIncome), incomeStreams);
