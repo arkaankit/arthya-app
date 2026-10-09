@@ -1,4 +1,4 @@
-import { LogOut, Settings as SettingsIcon, Sun, Moon } from "lucide-react";
+import { LogOut, Settings as SettingsIcon, Sun, Moon, UserRound } from "lucide-react";
 import { Button } from "./ui/button";
 import {
   DropdownMenu,
@@ -11,18 +11,19 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { useData } from "../lib/data-context";
 import { toast } from "sonner@2.0.3";
-import { creatureSprite } from "../lib/sprites";
-import { PixelSprite } from "./PixelSprite";
+import { levelInfo } from "../lib/game";
+import { PlayerAvatar } from "./PlayerAvatar";
 
 interface ProfileMenuProps {
   onNavigateToSettings: () => void;
+  onNavigateToProfile: () => void;
   isDarkMode: boolean;
   onToggleDarkMode: () => void;
 }
 
-export function ProfileMenu({ onNavigateToSettings, isDarkMode, onToggleDarkMode }: ProfileMenuProps) {
+export function ProfileMenu({ onNavigateToSettings, onNavigateToProfile, isDarkMode, onToggleDarkMode }: ProfileMenuProps) {
   const { profile, resetData, game, xp } = useData();
-  const sprite = game.player ? creatureSprite(game.player.creature, game.player.color) : null;
+  const level = levelInfo(xp);
 
   const handleSignOut = () => {
     if (confirm('Are you sure you want to sign out? This will reset all your data.')) {
@@ -50,9 +51,9 @@ export function ProfileMenu({ onNavigateToSettings, isDarkMode, onToggleDarkMode
         >
           <Avatar className="h-9 w-9 border-2 border-amber-500/20 hover:border-amber-500/40 transition-colors">
             <AvatarImage src={profile?.avatar} />
-            {sprite ? (
+            {game.player ? (
               <AvatarFallback className="bg-secondary">
-                <PixelSprite rows={sprite.rows} palette={sprite.palette} size={24} />
+                <PlayerAvatar size={26} />
               </AvatarFallback>
             ) : (
               <AvatarFallback className="bg-gradient-to-br from-amber-500 via-yellow-600 to-orange-600 text-white text-sm">
@@ -66,8 +67,8 @@ export function ProfileMenu({ onNavigateToSettings, isDarkMode, onToggleDarkMode
         <DropdownMenuLabel>
           <div className="flex flex-col space-y-1">
             <p>{profile?.name || 'User'}</p>
-            {!game.calm && xp > 0 && (
-              <p className="text-xs font-semibold text-orange-600 dark:text-orange-400">{xp} XP</p>
+            {!game.calm && (
+              <p className="text-xs font-semibold text-orange-600 dark:text-orange-400">Level {level.level} · {level.title} · {xp} XP</p>
             )}
             {profile?.email && (
               <p className="text-xs text-muted-foreground">{profile.email}</p>
@@ -75,6 +76,10 @@ export function ProfileMenu({ onNavigateToSettings, isDarkMode, onToggleDarkMode
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={onNavigateToProfile} className="cursor-pointer">
+          <UserRound className="mr-2 h-4 w-4" />
+          <span>Your player</span>
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={onNavigateToSettings} className="cursor-pointer">
           <SettingsIcon className="mr-2 h-4 w-4" />
           <span>Settings</span>

@@ -1,7 +1,12 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { toast } from 'sonner@2.0.3';
 import { storage, Account, Asset, IncomeStream, Expense, Goal, UserProfile } from './storage';
-import { DEFAULT_GAME, monthlySaveAward, newSetupAwards, questTitle, totalXp, type GameState, type Player } from './game';
+import {
+  BADGES, DEFAULT_GAME, activeQuests, levelInfo, type BadgeFacts, type QuestView, monthCloseAwards, monthlyProgressAwards, monthlySaveAward, monthOf, newBadges,
+  newSetupAwards, questTitle, totalXp, weekOfMonth, type GameState, type Player,
+} from './game';
+import { convertCurrency } from './currency';
+import { convertToMonthly, type Frequency } from './frequency';
 
 interface DataContextType {
   // Profile
@@ -47,6 +52,9 @@ interface DataContextType {
   replayOnboarding: () => void;
   downloadBackup: () => void;
   snoozeSaveReminder: () => void;
+  setCalm: (calm: boolean) => void;
+  badgeFacts: BadgeFacts;
+  quests: QuestView[];
 
   // Utilities
   resetData: () => void;
@@ -90,29 +98,77 @@ export function DataProvider({ children }: { children: ReactNode }) {
     storage.setGame(next);
   };
 
-  // Award setup quests whenever the data they check changes. Quest ids already in the ledger
-  // are never awarded again, so deleting and re-adding an item earns nothing extra.
+  // Facts the game rules and the profile screen both read.
+  const base = profile?.currency ?? 'USD';
+  const monthly = (list: { amount: number; currency: string; frequency: string }[]) =>
+    list.reduce((sum, i) => sum + convertToMonthly(convertCurrency(i.amount, i.currency, base), i.frequency as Frequency), 0);
+  const items = [...incomeStreams, ...expenses];
+  const badgeFacts: BadgeFacts = {
+    assetLinked: items.some(i => i.assetId),
+    currencies: new Set([...accounts, ...assets, ...items].map(i => i.currency)).size,
+  };
+
+  // The one place game progress is decided: records this week's visit, judges last month on the
+  // first start of a new month, and pays any quests the data now satisfies. Award ids already in
+  // the ledger are never paid again, so deleting and re-adding items earns nothing extra.
   useEffect(() => {
-    const awards = newSetupAwards({
-      hasPlayer: game.player !== null,
-      currencyConfirmed: game.currencyConfirmed,
+    const now = new Date();
+    const nowIso = now.toISOString();
+    const month = monthOf(nowIso);
+    const week = weekOfMonth(nowIso);
+
+    let next = game;
+    const weeks = game.visits[month] ?? [];
+    if (!weeks.includes(week)) next = { ...next, visits: { [month]: [...weeks, week] } }; // keeps only this month
+
+    const close = monthCloseAwards({
+      monthlyIncome: monthly(incomeStreams),
+      monthlyExpenses: monthly(expenses),
+      items: items.length,
+      unlinked: items.filter(i => !i.accountId).length,
+    }, next.ledger, next.monthCloseChecked, now);
+    if (close.checked !== next.monthCloseChecked) next = { ...next, monthCloseChecked: close.checked };
+
+    const awards = [...close.awards];
+    awards.push(...newSetupAwards({
+      hasPlayer: next.player !== null,
+      currencyConfirmed: next.currencyConfirmed,
       incomes: incomeStreams.length,
       accounts: accounts.length,
       expenses: expenses.length,
-      linkedItems: [...incomeStreams, ...expenses].filter(item => item.accountId).length,
-      saves: game.saves.length,
-    }, game.ledger);
-    const monthly = monthlySaveAward(game.saves, [...game.ledger, ...awards]);
-    if (monthly) awards.push(monthly);
-    if (awards.length === 0) return;
-    saveGame({ ...game, ledger: [...game.ledger, ...awards] });
-    if (game.calm) return;
+      linkedItems: items.filter(i => i.accountId).length,
+      saves: next.saves.length,
+    }, [...next.ledger, ...awards], now));
+    const save = monthlySaveAward(next.saves, [...next.ledger, ...awards], now);
+    if (save) awards.push(save);
+    awards.push(...monthlyProgressAwards({
+      accountReviews: accounts.map(a => a.reviewedAt),
+      weeksVisited: next.visits[month] ?? [],
+    }, [...next.ledger, ...awards], now));
+
+    const ledger = [...next.ledger, ...awards];
+    const badges = newBadges(ledger, badgeFacts, next.badges, now);
+
+    if (next === game && awards.length === 0 && badges.length === 0) return;
+    saveGame({ ...next, ledger, badges: [...next.badges, ...badges] });
+    if (next.calm) return;
     if (awards.length === 1) {
       toast.success(`Quest complete: ${questTitle(awards[0].id)}`, { description: `+${awards[0].xp} XP` });
-    } else {
-      toast.success(`${awards.length} quests complete`, { description: `+${totalXp(awards)} XP for what you've already set up` });
+    } else if (awards.length > 1) {
+      toast.success(`${awards.length} quests complete`, { description: `+${totalXp(awards)} XP` });
     }
-  }, [game, accounts.length, incomeStreams, expenses]);
+    if (badges.length > 0) {
+      const names = badges.map(b => BADGES.find(x => x.id === b.id)?.name).join(', ');
+      toast.success(badges.length === 1 ? `Badge unlocked: ${names}` : `${badges.length} badges unlocked`, {
+        description: badges.length === 1 ? undefined : names,
+      });
+    }
+    const before = levelInfo(totalXp(game.ledger)).level;
+    const after = levelInfo(totalXp(ledger)).level;
+    if (after > before) {
+      toast.success(`Level ${after}: ${levelInfo(totalXp(ledger)).title}`, { description: 'Your creature unlocked something new. See your profile.' });
+    }
+  }, [game, accounts, assets, incomeStreams, expenses, profile?.currency]);
 
   // Downloads a backup file ("save your game") and remembers its date and name (never the file).
   const downloadBackup = () => {
@@ -162,7 +218,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
     },
   });
 
-  const acc = withCurrencyPrompt(crud(accounts, setAccounts, storage.setAccounts), accounts);
+  // Saving an account (new or edited, even with the same balance) confirms it for the monthly review.
+  const accOps = withCurrencyPrompt(crud(accounts, setAccounts, storage.setAccounts), accounts);
+  const acc: Crud<Account> = {
+    ...accOps,
+    add: item => accOps.add({ ...item, reviewedAt: new Date().toISOString() }),
+    update: (id, updates) => accOps.update(id, { ...updates, reviewedAt: new Date().toISOString() }),
+  };
   const ast = withCurrencyPrompt(crud(assets, setAssets, storage.setAssets), assets);
   const inc = withCurrencyPrompt(crud(incomeStreams, setIncomeStreams, storage.setIncome), incomeStreams);
   const exp = withCurrencyPrompt(crud(expenses, setExpenses, storage.setExpenses), expenses);
@@ -214,6 +276,21 @@ export function DataProvider({ children }: { children: ReactNode }) {
         downloadBackup,
         snoozeSaveReminder: () =>
           saveGame({ ...game, reminderSnoozedUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() }),
+        setCalm: (calm: boolean) => saveGame({ ...game, calm }),
+        badgeFacts,
+        quests: activeQuests({
+          hasPlayer: game.player !== null,
+          currencyConfirmed: game.currencyConfirmed,
+          incomes: incomeStreams.length,
+          accounts: accounts.length,
+          expenses: expenses.length,
+          linkedItems: items.filter(i => i.accountId).length,
+          saves: game.saves.length,
+          reviewedAccounts: accounts.filter(a => a.reviewedAt && monthOf(a.reviewedAt) === monthOf(new Date().toISOString())).length,
+          savingsRate: monthly(incomeStreams) > 0 ? ((monthly(incomeStreams) - monthly(expenses)) / monthly(incomeStreams)) * 100 : null,
+          unlinked: items.filter(i => !i.accountId).length,
+          weeksVisited: (game.visits[monthOf(new Date().toISOString())] ?? []).length,
+        }, game.ledger),
         resetData,
       }}
     >
