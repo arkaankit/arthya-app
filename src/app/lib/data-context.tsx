@@ -1,6 +1,7 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { toast } from 'sonner@2.0.3';
 import { storage, Account, Asset, IncomeStream, Expense, Goal, UserProfile } from './storage';
+import { DEFAULT_GAME, newSetupAwards, questTitle, totalXp, type GameState, type Player } from './game';
 
 interface DataContextType {
   // Profile
@@ -37,6 +38,15 @@ interface DataContextType {
   updateGoal: (id: string, goal: Partial<Goal>) => void;
   deleteGoal: (id: string) => void;
   
+  // Game layer
+  game: GameState;
+  xp: number;
+  setPlayer: (player: Player) => void;
+  confirmCurrency: () => void;
+  finishOnboarding: () => void;
+  replayOnboarding: () => void;
+  downloadBackup: () => void;
+
   // Utilities
   resetData: () => void;
 }
@@ -72,6 +82,47 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [incomeStreams, setIncomeStreams] = useState<IncomeStream[]>(storage.getIncome);
   const [expenses, setExpenses] = useState<Expense[]>(storage.getExpenses);
   const [goals, setGoals] = useState<Goal[]>(storage.getGoals);
+  const [game, setGame] = useState<GameState>(storage.getGame);
+
+  const saveGame = (next: GameState) => {
+    setGame(next);
+    storage.setGame(next);
+  };
+
+  // Award setup quests whenever the data they check changes. Quest ids already in the ledger
+  // are never awarded again, so deleting and re-adding an item earns nothing extra.
+  useEffect(() => {
+    const awards = newSetupAwards({
+      hasPlayer: game.player !== null,
+      currencyConfirmed: game.currencyConfirmed,
+      incomes: incomeStreams.length,
+      accounts: accounts.length,
+      expenses: expenses.length,
+      linkedItems: [...incomeStreams, ...expenses].filter(item => item.accountId).length,
+      saves: game.saves.length,
+    }, game.ledger);
+    if (awards.length === 0) return;
+    saveGame({ ...game, ledger: [...game.ledger, ...awards] });
+    if (game.calm) return;
+    if (awards.length === 1) {
+      toast.success(`Quest complete: ${questTitle(awards[0].id)}`, { description: `+${awards[0].xp} XP` });
+    } else {
+      toast.success(`${awards.length} quests complete`, { description: `+${totalXp(awards)} XP for what you've already set up` });
+    }
+  }, [game, accounts.length, incomeStreams, expenses]);
+
+  // Downloads a backup file ("save your game") and remembers its date and name (never the file).
+  const downloadBackup = () => {
+    const file = `arthya-save-${new Date().toISOString().slice(0, 10)}.json`;
+    const url = URL.createObjectURL(new Blob([storage.exportBackup()], { type: 'application/json' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = file;
+    link.click();
+    URL.revokeObjectURL(url);
+    saveGame({ ...game, saves: [{ at: new Date().toISOString(), file }, ...game.saves].slice(0, 10) });
+    toast.success('Game saved. Keep the file somewhere safe.');
+  };
 
   // Profile operations
   const updateProfile = (newProfile: UserProfile) => {
@@ -123,6 +174,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setIncomeStreams([]);
     setExpenses([]);
     setGoals([]);
+    setGame(DEFAULT_GAME);
   };
 
   return (
@@ -150,6 +202,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
         addGoal: goal.add,
         updateGoal: goal.update,
         deleteGoal: goal.remove,
+        game,
+        xp: totalXp(game.ledger),
+        setPlayer: (player: Player) => saveGame({ ...game, player }),
+        confirmCurrency: () => saveGame({ ...game, currencyConfirmed: true }),
+        finishOnboarding: () => saveGame({ ...game, onboarded: true }),
+        replayOnboarding: () => saveGame({ ...game, onboarded: false }),
+        downloadBackup,
         resetData,
       }}
     >

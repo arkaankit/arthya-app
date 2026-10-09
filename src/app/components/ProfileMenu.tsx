@@ -11,6 +11,8 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { useData } from "../lib/data-context";
 import { toast } from "sonner@2.0.3";
+import { creatureSprite } from "../lib/sprites";
+import { PixelSprite } from "./PixelSprite";
 
 interface ProfileMenuProps {
   onNavigateToSettings: () => void;
@@ -19,12 +21,12 @@ interface ProfileMenuProps {
 }
 
 export function ProfileMenu({ onNavigateToSettings, isDarkMode, onToggleDarkMode }: ProfileMenuProps) {
-  const { profile, resetData } = useData();
+  const { profile, resetData, game, xp } = useData();
+  const sprite = game.player ? creatureSprite(game.player.creature, game.player.color) : null;
 
   const handleSignOut = () => {
     if (confirm('Are you sure you want to sign out? This will reset all your data.')) {
       resetData();
-      localStorage.removeItem('guidedTourDismissed');
       toast.success('Signed out successfully. All data has been cleared.');
     }
   };
@@ -48,9 +50,15 @@ export function ProfileMenu({ onNavigateToSettings, isDarkMode, onToggleDarkMode
         >
           <Avatar className="h-9 w-9 border-2 border-amber-500/20 hover:border-amber-500/40 transition-colors">
             <AvatarImage src={profile?.avatar} />
-            <AvatarFallback className="bg-gradient-to-br from-amber-500 via-yellow-600 to-orange-600 text-white text-sm">
-              {profile?.name ? getInitials(profile.name) : 'U'}
-            </AvatarFallback>
+            {sprite ? (
+              <AvatarFallback className="bg-secondary">
+                <PixelSprite rows={sprite.rows} palette={sprite.palette} size={24} />
+              </AvatarFallback>
+            ) : (
+              <AvatarFallback className="bg-gradient-to-br from-amber-500 via-yellow-600 to-orange-600 text-white text-sm">
+                {profile?.name ? getInitials(profile.name) : 'U'}
+              </AvatarFallback>
+            )}
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
@@ -58,6 +66,9 @@ export function ProfileMenu({ onNavigateToSettings, isDarkMode, onToggleDarkMode
         <DropdownMenuLabel>
           <div className="flex flex-col space-y-1">
             <p>{profile?.name || 'User'}</p>
+            {!game.calm && xp > 0 && (
+              <p className="text-xs font-semibold text-orange-600 dark:text-orange-400">{xp} XP</p>
+            )}
             {profile?.email && (
               <p className="text-xs text-muted-foreground">{profile.email}</p>
             )}
