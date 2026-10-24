@@ -48,11 +48,11 @@ export function IncomeStreamItem({
       <Card className="p-4 sm:p-5 border-border/50 hover:border-border transition-colors group">
         <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-          <div className="p-2 sm:p-3 shrink-0 rounded-xl bg-green-500/10">
+          <div className="hidden sm:block p-3 shrink-0 rounded-xl bg-green-500/10">
             <TrendingUp className="w-5 h-5 text-green-600 dark:text-green-400" />
           </div>
           <div className="min-w-0">
-            <h4 className="mb-1 truncate">{source}</h4>
+            <h4 className="mb-1 line-clamp-2 break-words">{source}</h4>
             <Badge variant="secondary" className="text-xs">
               {category}
             </Badge>
@@ -78,7 +78,7 @@ export function IncomeStreamItem({
               variant="ghost"
               size="sm"
               onClick={handleEdit}
-              className="h-8 w-8 p-0"
+              className="h-9 w-9 p-0"
             >
               <Pencil className="h-4 w-4" />
             </Button>
@@ -86,7 +86,7 @@ export function IncomeStreamItem({
               variant="ghost"
               size="sm"
               onClick={handleDelete}
-              className="h-8 w-8 p-0"
+              className="h-9 w-9 p-0"
             >
               <Trash2 className="h-4 w-4 text-destructive" />
             </Button>

@@ -77,7 +77,7 @@ export function AssetCard({
   return (
     <>
       <AssetDialog open={showEditDialog} onOpenChange={setShowEditDialog} id={id} />
-      <Card className="p-6 border-border/50 hover:border-border transition-all cursor-pointer group relative overflow-hidden">
+      <Card className="p-4 sm:p-6 border-border/50 hover:border-border transition-all cursor-pointer group relative overflow-hidden">
       <div 
         className="absolute inset-0 opacity-5 group-hover:opacity-10 transition-opacity"
         style={{ background: `linear-gradient(135deg, ${color} 0%, transparent 100%)` }}

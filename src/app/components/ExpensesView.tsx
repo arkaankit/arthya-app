@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { HelpTip } from "./GuideView";
 import { ExpenseItem } from "./ExpenseItem";
 import { ExpenseDialog } from "./ExpenseDialog";
 import { PrimaryButton } from "./PrimaryButton";
@@ -8,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Alert, AlertDescription } from "./ui/alert";
 import { Plus, ArrowDownCircle, AlertCircle, Info } from "lucide-react";
 import { useData } from "../lib/data-context";
+import { plural } from "../lib/constants";
 import { formatCurrency, convertCurrency } from "../lib/currency";
 import { convertToMonthly } from "../lib/frequency";
 
@@ -35,9 +37,9 @@ export function ExpensesView() {
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h2 className="page-title mb-2">Expenses</h2>
+          <div className="flex items-center gap-1.5 mb-2"><h2 className="page-title">Expenses</h2><HelpTip page="expenses" /></div>
           <p className="text-muted-foreground">
-            Track and manage all your expenses
+            Money going out. Link each bill to the account that pays it.
           </p>
         </div>
         <PrimaryButton icon={<Plus className="w-4 h-4" />} onClick={() => setShowAddDialog(true)}>
@@ -58,8 +60,8 @@ export function ExpensesView() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="p-6 border-border/50 bg-gradient-to-br from-red-500/10 to-transparent">
-          <div className="flex items-start justify-between mb-4">
+        <Card className="p-4 sm:p-6 border-border/50 bg-gradient-to-br from-red-500/10 to-transparent">
+          <div className="flex items-start justify-between mb-2 sm:mb-4">
             <div>
               <p className="text-muted-foreground mb-1">Total Monthly Expenses</p>
               <h2 className="text-red-600 dark:text-red-400">
@@ -71,12 +73,12 @@ export function ExpensesView() {
             </div>
           </div>
           <p className="text-sm text-muted-foreground">
-            {expenses.length} tracked expenses
+            {plural(expenses.length, "tracked expense")}
           </p>
         </Card>
         
-        <Card className="p-6 border-border/50">
-          <div className="flex items-start justify-between mb-4">
+        <Card className="p-4 sm:p-6 border-border/50">
+          <div className="flex items-start justify-between mb-2 sm:mb-4">
             <div>
               <p className="text-muted-foreground mb-1">Expense Categories</p>
               <h3>{categories.length}</h3>
@@ -144,7 +146,7 @@ export function ExpensesView() {
 
       {/* Expense Breakdown */}
       {expenses.length > 0 && (
-        <Card className="p-6 border-border/50">
+        <Card className="p-4 sm:p-6 border-border/50">
           <h3 className="mb-4">Expense Breakdown by Category</h3>
           <div className="space-y-4">
             {categories.map(category => {

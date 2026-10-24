@@ -22,6 +22,7 @@ import {
 import { useData } from "../lib/data-context";
 import { formatCurrency, convertCurrency } from "../lib/currency";
 import { convertToMonthly } from "../lib/frequency";
+import { plural } from "../lib/constants";
 import {
   LineChart,
   Line,
@@ -124,7 +125,7 @@ export function DashboardView() {
           </Alert>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="p-6 border-dashed border-2">
+            <Card className="p-4 sm:p-6 border-dashed border-2">
               <div className="text-center">
                 <Wallet className="w-8 h-8 mx-auto mb-3 text-muted-foreground" />
                 <h4 className="mb-2">Add Account</h4>
@@ -137,7 +138,7 @@ export function DashboardView() {
               </div>
             </Card>
             
-            <Card className="p-6 border-dashed border-2">
+            <Card className="p-4 sm:p-6 border-dashed border-2">
               <div className="text-center">
                 <TrendingUp className="w-8 h-8 mx-auto mb-3 text-muted-foreground" />
                 <h4 className="mb-2">Add Income</h4>
@@ -151,7 +152,7 @@ export function DashboardView() {
               </div>
             </Card>
             
-            <Card className="p-6 border-dashed border-2">
+            <Card className="p-4 sm:p-6 border-dashed border-2">
               <div className="text-center">
                 <TrendingDown className="w-8 h-8 mx-auto mb-3 text-muted-foreground" />
                 <h4 className="mb-2">Add Expense</h4>
@@ -172,6 +173,7 @@ export function DashboardView() {
 
   return (
     <div className="space-y-6">
+      <ExpenseDialog open={showAddExpense} onOpenChange={setShowAddExpense} />
       {/* Header */}
       <div>
         <h2 className="page-title mb-2">Dashboard</h2>
@@ -215,7 +217,7 @@ export function DashboardView() {
 
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="p-6 lg:col-span-2 border-border/50">
+        <Card className="p-4 sm:p-6 lg:col-span-2 border-border/50">
           <h3 className="mb-1">Balance Projection</h3>
           <p className="text-sm text-muted-foreground mb-6">
             Next 12 months if your current recurring income and expenses stay the same
@@ -253,9 +255,17 @@ export function DashboardView() {
           </ResponsiveContainer>
         </Card>
 
-        <Card className="p-6 border-border/50">
+        <Card className="p-4 sm:p-6 border-border/50">
           <h3 className="mb-6">Expenses by Category</h3>
-          <ResponsiveContainer width="100%" height={300}>
+          {expensesByCategory.length === 0 ? (
+            <div className="h-40 rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center gap-3 text-center px-4">
+              <p className="text-sm text-muted-foreground">No expenses yet. Add one to see where your money goes.</p>
+              <Button size="sm" variant="outline" className="gap-2" onClick={() => setShowAddExpense(true)}>
+                <Plus className="w-4 h-4" />Add expense
+              </Button>
+            </div>
+          ) : (
+          <ResponsiveContainer width="100%" height={260}>
             <PieChart>
               <Pie
                 data={expensesByCategory}
@@ -280,6 +290,7 @@ export function DashboardView() {
               />
             </PieChart>
           </ResponsiveContainer>
+          )}
           <div className="mt-4 space-y-2">
             {expensesByCategory.map((category) => (
               <div key={category.name} className="flex items-center justify-between text-sm">
@@ -329,8 +340,8 @@ export function DashboardView() {
 
       {/* Quick Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="p-6 border-border/50">
-          <div className="flex items-start justify-between mb-4">
+        <Card className="p-4 sm:p-6 border-border/50">
+          <div className="flex items-start justify-between mb-2 sm:mb-4">
             <div>
               <p className="text-muted-foreground mb-1">Income Sources</p>
               <h2>{incomeStreams.length}</h2>
@@ -343,20 +354,20 @@ export function DashboardView() {
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Active Sources</span>
               <span>
-                {incomeStreams.length} sources
+                {plural(incomeStreams.length, "source")}
               </span>
             </div>
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Categories</span>
               <span>
-                {Array.from(new Set(incomeStreams.map(i => i.category))).length} types
+                {plural(new Set(incomeStreams.map(i => i.category)).size, "category", "categories")}
               </span>
             </div>
           </div>
         </Card>
 
-        <Card className="p-6 border-border/50">
-          <div className="flex items-start justify-between mb-4">
+        <Card className="p-4 sm:p-6 border-border/50">
+          <div className="flex items-start justify-between mb-2 sm:mb-4">
             <div>
               <p className="text-muted-foreground mb-1">Active Expenses</p>
               <h2>{expenses.length}</h2>
@@ -369,13 +380,13 @@ export function DashboardView() {
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Active Expenses</span>
               <span>
-                {expenses.length} items
+                {plural(expenses.length, "item")}
               </span>
             </div>
             <div className="flex items-center justify-between text-sm">
               <span className="text-muted-foreground">Categories</span>
               <span>
-                {Array.from(new Set(expenses.map(e => e.category))).length} types
+                {plural(new Set(expenses.map(e => e.category)).size, "category", "categories")}
               </span>
             </div>
           </div>

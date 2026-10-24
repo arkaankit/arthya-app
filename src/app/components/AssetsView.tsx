@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { HelpTip } from "./GuideView";
 import { AssetCard } from "./AssetCard";
 import { AssetDialog } from "./AssetDialog";
 import { PrimaryButton } from "./PrimaryButton";
@@ -8,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Alert, AlertDescription } from "./ui/alert";
 import { Plus, Home, Car, Wrench, Package, Info, TrendingUp, TrendingDown } from "lucide-react";
 import { useData } from "../lib/data-context";
+import { plural } from "../lib/constants";
 import { formatCurrency, convertCurrency } from "../lib/currency";
 import { convertToMonthly } from "../lib/frequency";
 
@@ -57,9 +59,9 @@ export function AssetsView() {
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h2 className="page-title mb-2">Assets</h2>
+          <div className="flex items-center gap-1.5 mb-2"><h2 className="page-title">Assets</h2><HelpTip page="assets" /></div>
           <p className="text-muted-foreground">
-            Manage properties, vehicles, and other assets with income and expenses
+            Things you own. Link their rent and upkeep to see what each one earns or costs.
           </p>
         </div>
         <PrimaryButton icon={<Plus className="w-4 h-4" />} onClick={() => setShowAddDialog(true)}>
@@ -82,8 +84,8 @@ export function AssetsView() {
         <>
           {/* Summary Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card className="p-6 border-border/50">
-              <div className="flex items-start justify-between mb-4">
+            <Card className="p-4 sm:p-6 border-border/50">
+              <div className="flex items-start justify-between mb-2 sm:mb-4">
                 <div>
                   <p className="text-muted-foreground mb-1">Total Asset Value</p>
                   <h3>{formatCurrency(totalValue, baseCurrency)}</h3>
@@ -93,12 +95,12 @@ export function AssetsView() {
                 </div>
               </div>
               <p className="text-sm text-muted-foreground">
-                {assets.length} assets
+                {plural(assets.length, "asset")}
               </p>
             </Card>
 
-            <Card className="p-6 border-border/50">
-              <div className="flex items-start justify-between mb-4">
+            <Card className="p-4 sm:p-6 border-border/50">
+              <div className="flex items-start justify-between mb-2 sm:mb-4">
                 <div>
                   <p className="text-muted-foreground mb-1">Appreciation</p>
                   <h3 className={totalAppreciation >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}>
@@ -118,8 +120,8 @@ export function AssetsView() {
               </p>
             </Card>
 
-            <Card className="p-6 border-border/50">
-              <div className="flex items-start justify-between mb-4">
+            <Card className="p-4 sm:p-6 border-border/50">
+              <div className="flex items-start justify-between mb-2 sm:mb-4">
                 <div>
                   <p className="text-muted-foreground mb-1">Asset Income</p>
                   <h3 className="text-green-600 dark:text-green-400">
@@ -135,8 +137,8 @@ export function AssetsView() {
               </p>
             </Card>
 
-            <Card className="p-6 border-border/50">
-              <div className="flex items-start justify-between mb-4">
+            <Card className="p-4 sm:p-6 border-border/50">
+              <div className="flex items-start justify-between mb-2 sm:mb-4">
                 <div>
                   <p className="text-muted-foreground mb-1">Net Cash Flow</p>
                   <h3 className={netCashFlow >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}>
@@ -203,7 +205,7 @@ export function AssetsView() {
       )}
 
       {/* Info Card */}
-      <Card className="p-6 border-border/50 bg-gradient-to-br from-amber-500/5 to-transparent">
+      <Card className="p-4 sm:p-6 border-border/50 bg-gradient-to-br from-amber-500/5 to-transparent">
         <div className="flex items-start gap-4">
           <div className="p-3 rounded-xl bg-gradient-to-br from-amber-500/10 to-orange-500/10 shadow-sm shadow-amber-500/10 flex-shrink-0">
             <Info className="w-6 h-6 text-amber-600 dark:text-amber-400" />

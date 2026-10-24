@@ -19,7 +19,7 @@ export function DashboardMetricCard({
   iconColor
 }: DashboardMetricCardProps) {
   return (
-    <Card className="p-6 border-border/50 hover:border-border transition-colors">
+    <Card className="p-4 sm:p-6 border-border/50 hover:border-border transition-colors">
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
           <p className="text-sm sm:text-base text-muted-foreground mb-2">{title}</p>
@@ -35,10 +35,10 @@ export function DashboardMetricCard({
           )}
         </div>
         <div
-          className="p-2 sm:p-3 rounded-xl shrink-0"
+          className="hidden sm:block p-3 rounded-xl shrink-0"
           style={{ backgroundColor: `${iconColor}20` }}
         >
-          <Icon className="w-4 h-4 sm:w-6 sm:h-6" style={{ color: iconColor }} />
+          <Icon className="w-6 h-6" style={{ color: iconColor }} />
         </div>
       </div>
     </Card>

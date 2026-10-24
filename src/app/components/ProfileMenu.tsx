@@ -1,4 +1,4 @@
-import { LogOut, Settings as SettingsIcon, Sun, Moon, UserRound } from "lucide-react";
+import { Settings as SettingsIcon, Sun, Moon, UserRound } from "lucide-react";
 import { Button } from "./ui/button";
 import {
   DropdownMenu,
@@ -10,7 +10,6 @@ import {
 } from "./ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { useData } from "../lib/data-context";
-import { toast } from "sonner@2.0.3";
 import { levelInfo } from "../lib/game";
 import { PlayerAvatar } from "./PlayerAvatar";
 
@@ -22,15 +21,8 @@ interface ProfileMenuProps {
 }
 
 export function ProfileMenu({ onNavigateToSettings, onNavigateToProfile, isDarkMode, onToggleDarkMode }: ProfileMenuProps) {
-  const { profile, resetData, game, xp } = useData();
+  const { profile, game, xp } = useData();
   const level = levelInfo(xp);
-
-  const handleSignOut = () => {
-    if (confirm('Are you sure you want to sign out? This will reset all your data.')) {
-      resetData();
-      toast.success('Signed out successfully. All data has been cleared.');
-    }
-  };
 
   const getInitials = (name: string) => {
     return name
@@ -96,14 +88,6 @@ export function ProfileMenu({ onNavigateToSettings, onNavigateToProfile, isDarkM
               <span>Dark Mode</span>
             </>
           )}
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem 
-          onClick={handleSignOut}
-          className="cursor-pointer text-red-600 dark:text-red-400 focus:text-red-600 dark:focus:text-red-400"
-        >
-          <LogOut className="mr-2 h-4 w-4" />
-          <span>Sign Out</span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

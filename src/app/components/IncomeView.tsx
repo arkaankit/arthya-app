@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { HelpTip } from "./GuideView";
 import { IncomeStreamItem } from "./IncomeStreamItem";
 import { IncomeDialog } from "./IncomeDialog";
 import { PrimaryButton } from "./PrimaryButton";
@@ -6,6 +7,7 @@ import { Card } from "./ui/card";
 import { Alert, AlertDescription } from "./ui/alert";
 import { Plus, TrendingUp, DollarSign, Info } from "lucide-react";
 import { useData } from "../lib/data-context";
+import { plural } from "../lib/constants";
 import { formatCurrency, convertCurrency } from "../lib/currency";
 import { convertToMonthly } from "../lib/frequency";
 
@@ -26,9 +28,9 @@ export function IncomeView() {
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h2 className="page-title mb-2">Income Sources</h2>
+          <div className="flex items-center gap-1.5 mb-2"><h2 className="page-title">Income Sources</h2><HelpTip page="income" /></div>
           <p className="text-muted-foreground">
-            Manage and track all your income streams
+            Every source of money coming in. Link each one to the account it lands in.
           </p>
         </div>
         <PrimaryButton icon={<Plus className="w-4 h-4" />} onClick={() => setShowAddDialog(true)}>
@@ -49,8 +51,8 @@ export function IncomeView() {
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="p-6 border-border/50 bg-gradient-to-br from-green-500/10 to-transparent">
-          <div className="flex items-start justify-between mb-4">
+        <Card className="p-4 sm:p-6 border-border/50 bg-gradient-to-br from-green-500/10 to-transparent">
+          <div className="flex items-start justify-between mb-2 sm:mb-4">
             <div>
               <p className="text-muted-foreground mb-1">Total Monthly Income</p>
               <h2 className="text-green-600 dark:text-green-400">
@@ -62,12 +64,12 @@ export function IncomeView() {
             </div>
           </div>
           <p className="text-sm text-muted-foreground">
-            From {incomeStreams.length} sources
+            From {plural(incomeStreams.length, "source")}
           </p>
         </Card>
         
-        <Card className="p-6 border-border/50">
-          <div className="flex items-start justify-between mb-4">
+        <Card className="p-4 sm:p-6 border-border/50">
+          <div className="flex items-start justify-between mb-2 sm:mb-4">
             <div>
               <p className="text-muted-foreground mb-1">Income Sources</p>
               <h3>{incomeStreams.length}</h3>
@@ -105,7 +107,7 @@ export function IncomeView() {
 
       {/* Income by Category */}
       {incomeStreams.length > 0 && (
-        <Card className="p-6 border-border/50">
+        <Card className="p-4 sm:p-6 border-border/50">
           <h3 className="mb-4">Income by Category</h3>
           <div className="space-y-3">
             {Array.from(new Set(incomeStreams.map(s => s.category))).map(category => {
