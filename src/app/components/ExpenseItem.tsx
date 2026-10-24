@@ -61,13 +61,13 @@ export function ExpenseItem({
         <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3 sm:gap-4 min-w-0">
           <div 
-            className="p-3 rounded-xl"
+            className="hidden sm:block p-3 shrink-0 rounded-xl"
             style={{ backgroundColor: `${color}20` }}
           >
             <ArrowDownCircle className="w-5 h-5" style={{ color }} />
           </div>
           <div className="min-w-0">
-            <h4 className="mb-1 truncate">{name}</h4>
+            <h4 className="mb-1 line-clamp-2 break-words">{name}</h4>
             <Badge variant="outline" className="text-xs" style={{ borderColor: color, color }}>
               {category}
             </Badge>
@@ -93,7 +93,7 @@ export function ExpenseItem({
               variant="ghost"
               size="sm"
               onClick={handleEdit}
-              className="h-8 w-8 p-0"
+              className="h-9 w-9 p-0"
             >
               <Pencil className="h-4 w-4" />
             </Button>
@@ -101,7 +101,7 @@ export function ExpenseItem({
               variant="ghost"
               size="sm"
               onClick={handleDelete}
-              className="h-8 w-8 p-0"
+              className="h-9 w-9 p-0"
             >
               <Trash2 className="h-4 w-4 text-destructive" />
             </Button>

@@ -50,6 +50,15 @@ export const CRYSTAL_DIM: Palette = { o: '#5c6066', w: '#ffffff', c: '#c9d3dc', 
 export const CRYSTAL_DARK: Palette = { o: '#232629', w: '#989ea4', c: '#5c6066', s: '#3a3d41' };
 export const CRYSTAL_BY_STATE = { glowing: CRYSTAL_LIT, fading: CRYSTAL_DIM, dark: CRYSTAL_DARK } as const;
 
+// --- Buildings: income (office), account (vault), expense (market), asset (house) ---
+const TOWN: Palette = { o: '#232629', w: '#ffffff', g: '#7cc4fa', d: '#6c3200', s: '#c9d3dc', p: '#989ea4', y: '#e3f1fe', r: '#ff5e24', b: '#fff4ec' };
+export const BUILDINGS: Record<'income' | 'account' | 'expense' | 'asset', { rows: SpriteRows; palette: Palette }> = {
+  income: { palette: TOWN, rows: ['oooooooooooo', 'ogwgwgwgwgwo', 'owwwwwwwwwwo', 'ogwgwgwgwgwo', 'owwwwwwwwwwo', 'ogwgwgwgwgwo', 'owwwwwwwwwwo', 'ogwgwgwgwgwo', 'owwwwddwwwwo', 'owwwwddwwwwo', 'oooooooooooo'] },
+  account: { palette: TOWN, rows: ['......oo......', '....oossoo....', '..oossssssoo..', 'oossssssssssoo', 'oooooooooooooo', '.opwpwwpwwpwo.', '.opwpwwpwwpwo.', '.opwpwwpwwpwo.', '.opwpwwpwwpwo.', 'oooooooooooooo', 'oyyyyyyyyyyyyo', 'oooooooooooooo'] },
+  expense: { palette: { ...TOWN, y: '#ffb36b' }, rows: ['oooooooooooooo', 'orwrwrwrwrwrwo', 'orwrwrwrwrwrwo', '.oooooooooooo.', '.obbbbbbbbbbo.', '.obbybbybbybo.', '.obbbbbbbbbbo.', '.oooooooooooo.'] },
+  asset: { palette: TOWN, rows: ['......oo......', '.....orro.....', '....orrrro....', '...orrrrrro...', '..orrrrrrrro..', '.orrrrrrrrrro.', 'oooooooooooooo', '.owwwwwwwwwwo.', '.owggwwwwddwo.', '.owggwwwwddwo.', '.owwwwwwwwddo.', '.oooooooooooo.'] },
+};
+
 // --- Badges (9x9) ---
 const COIN: SpriteRows = ['.........', '..ooooo..', '.occccco.', 'occwcccso', 'occwcccso', 'occwcccso', 'occcccsso', '.ossssso.', '..ooooo..'];
 const STACK: SpriteRows = ['.........', '..ooooo..', '.occccco.', '.ossssso.', '.occccco.', '.ossssso.', '.occccco.', '.ossssso.', '..ooooo..'];

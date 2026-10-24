@@ -51,7 +51,7 @@ export function GoalProgressCard({
   return (
     <>
       <GoalDialog open={showEditDialog} onOpenChange={setShowEditDialog} id={id} />
-      <Card className="p-6 border-border/50 group">
+      <Card className="p-4 sm:p-6 border-border/50 group">
         <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-3">
           <div 

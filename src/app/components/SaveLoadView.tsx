@@ -35,10 +35,11 @@ export function SaveReminder({ onOpen }: { onOpen: () => void }) {
         <p className="font-bold">{days === null ? "You haven't saved yet" : `Your last save was ${days} days ago`}</p>
         <p className="text-[13px] text-muted-foreground">If this browser is cleared, your data is gone. A save file takes a second.</p>
       </div>
-      <div className="flex flex-wrap gap-2">
-        <button onClick={snoozeSaveReminder} className="h-11 px-3 rounded-md text-sm font-semibold text-muted-foreground hover:text-foreground">Remind me in 7 days</button>
+      {/* Phone: "Save now" full width on top, the other two side by side under it. */}
+      <div className="grid grid-cols-2 gap-2 w-full sm:flex sm:w-auto">
+        <button onClick={downloadBackup} className="col-span-2 sm:order-last h-11 px-4 rounded-md bg-orange-500 text-white text-sm font-semibold shadow-pressed hover:bg-orange-600">Save now</button>
+        <button onClick={snoozeSaveReminder} className="h-11 px-3 rounded-md text-sm font-semibold text-muted-foreground hover:text-foreground">Snooze 7 days</button>
         <button onClick={onOpen} className="h-11 px-3 rounded-md border border-border text-sm font-semibold hover:bg-secondary">Save & Load</button>
-        <button onClick={downloadBackup} className="h-11 px-4 rounded-md bg-orange-500 text-white text-sm font-semibold shadow-pressed hover:bg-orange-600">Save now</button>
       </div>
     </div>
   );

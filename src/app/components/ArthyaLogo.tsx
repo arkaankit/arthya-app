@@ -143,3 +143,11 @@ export function ArthyaLogo({ className = "", size = 40 }: ArthyaLogoProps) {
     </div>
   );
 }
+
+// The "Arthya" wordmark keeps its original amber→yellow→orange colours (Tailwind's stock
+// amber-600/yellow-600/orange-600), independent of the app's remapped orange palette.
+export const WORDMARK_STYLE = {
+  fontFamily: "'Eagle Lake', serif",
+  backgroundImage:
+    "linear-gradient(to right in oklab, oklch(66.6% 0.179 58.318), oklch(68.1% 0.162 75.834), oklch(64.6% 0.222 41.116))",
+};

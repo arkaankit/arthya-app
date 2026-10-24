@@ -56,8 +56,8 @@ export function PlanningView() {
 
       {/* Planning Summary */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="p-6 border-border/50">
-          <div className="flex items-start justify-between mb-4">
+        <Card className="p-4 sm:p-6 border-border/50">
+          <div className="flex items-start justify-between mb-2 sm:mb-4">
             <div>
               <p className="text-muted-foreground mb-1">Active Goals</p>
               <h2>{goals.length}</h2>
@@ -71,8 +71,8 @@ export function PlanningView() {
           </p>
         </Card>
 
-        <Card className="p-6 border-border/50">
-          <div className="flex items-start justify-between mb-4">
+        <Card className="p-4 sm:p-6 border-border/50">
+          <div className="flex items-start justify-between mb-2 sm:mb-4">
             <div>
               <p className="text-muted-foreground mb-1">Monthly Surplus</p>
               <h3 className={monthlySavings >= 0 ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}>
@@ -88,8 +88,8 @@ export function PlanningView() {
           </p>
         </Card>
 
-        <Card className="p-6 border-border/50">
-          <div className="flex items-start justify-between mb-4">
+        <Card className="p-4 sm:p-6 border-border/50">
+          <div className="flex items-start justify-between mb-2 sm:mb-4">
             <div>
               <p className="text-muted-foreground mb-1">Total Target</p>
               <h3>{formatCurrency(goals.reduce((sum, g) => sum + g.targetAmount, 0), baseCurrency)}</h3>
@@ -114,7 +114,7 @@ export function PlanningView() {
       )}
 
       {/* Purchase Planning Simulator */}
-      <Card className="p-6 border-border/50 bg-gradient-to-br from-amber-500/5 to-transparent">
+      <Card className="p-4 sm:p-6 border-border/50 bg-gradient-to-br from-amber-500/5 to-transparent">
         <div className="flex items-center gap-3 mb-6">
           <div className="p-3 rounded-xl bg-gradient-to-br from-amber-500/10 to-orange-500/10 shadow-sm shadow-amber-500/10">
             <Calculator className="w-6 h-6 text-amber-600 dark:text-amber-400" />
@@ -197,7 +197,7 @@ export function PlanningView() {
             {canAfford && (
               <div className="mt-4 p-4 bg-green-500/10 border border-green-500/20 rounded-lg">
                 <p className="text-sm text-green-700 dark:text-green-300">
-                  You can comfortably afford this purchase! After saving {formatCurrency(requiredMonthlySaving, baseCurrency)} 
+                  You can comfortably afford this purchase! After saving {formatCurrency(requiredMonthlySaving, baseCurrency)}{' '}
                   per month, you'll still have {formatCurrency(monthlySavings - requiredMonthlySaving, baseCurrency)} remaining.
                 </p>
               </div>
@@ -219,7 +219,7 @@ export function PlanningView() {
       )}
 
       {/* Quick Actions */}
-      <Card className="p-6 border-border/50">
+      <Card className="p-4 sm:p-6 border-border/50">
         <h3 className="mb-4">Quick Planning Actions</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <Button variant="outline" className="justify-start gap-3 h-auto py-4">

@@ -39,3 +39,6 @@ export const FREQUENCIES = [
   { value: 'quarterly', label: 'Quarterly' },
   { value: 'yearly', label: 'Yearly' },
 ];
+
+/** "1 account", "3 accounts" */
+export const plural = (n: number, one: string, many = `${one}s`) => `${n} ${n === 1 ? one : many}`;

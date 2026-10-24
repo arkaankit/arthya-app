@@ -17,12 +17,13 @@ import { PlanningView } from "./components/PlanningView";
 import { SettingsView } from "./components/SettingsView";
 import { PrivacyInfoPopover } from "./components/PrivacyInfoPopover";
 import { ProfileMenu } from "./components/ProfileMenu";
-import { ArthyaLogo } from "./components/ArthyaLogo";
+import { ArthyaLogo, WORDMARK_STYLE } from "./components/ArthyaLogo";
 import { PixelSprite } from "./components/PixelSprite";
 import { CLOUD, CLOUD_PALETTE, CRYSTAL, CRYSTAL_BY_STATE } from "./lib/sprites";
 import { crystalState } from "./lib/game";
 import { SaveLoadView, SaveReminder, savedAgo } from "./components/SaveLoadView";
 import { ProfileView } from "./components/ProfileView";
+import { GuideView } from "./components/GuideView";
 import { Button } from "./components/ui/button";
 import { 
   LayoutDashboard, 
@@ -34,21 +35,14 @@ import {
   Settings,
   Shield,
   Heart,
-  Menu
+  Menu,
+  BookOpen
 } from "lucide-react";
 import { Toaster } from "./components/ui/sonner";
 import { toast } from "sonner@2.0.3";
 import { storage } from "./lib/storage";
 
-// The "Arthya" wordmark keeps its original amber→yellow→orange colours (Tailwind's stock
-// amber-600/yellow-600/orange-600), independent of the app's remapped orange palette.
-const WORDMARK_STYLE = {
-  fontFamily: "'Eagle Lake', serif",
-  backgroundImage:
-    "linear-gradient(to right in oklab, oklch(66.6% 0.179 58.318), oklch(68.1% 0.162 75.834), oklch(64.6% 0.222 41.116))",
-};
-
-type ViewType ='dashboard' | 'income' | 'expenses' | 'accounts' | 'assets' | 'planning' | 'settings' | 'saves' | 'profile';
+type ViewType ='dashboard' | 'income' | 'expenses' | 'accounts' | 'assets' | 'planning' | 'settings' | 'saves' | 'profile' | 'guide';
 
 function AppContent() {
   const { profile, updateProfile, resetData, game } = useData();
@@ -106,6 +100,7 @@ function AppContent() {
     { id: 'accounts', label: 'Accounts', icon: Wallet },
     { id: 'assets', label: 'Assets', icon: Home },
     { id: 'planning', label: 'Planning', icon: Target },
+    { id: 'guide', label: 'How Arthya works', icon: BookOpen },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
@@ -127,6 +122,8 @@ function AppContent() {
         return <SettingsView onResetData={handleResetData} onOpenSaves={() => setCurrentView('saves')} />;
       case 'saves':
         return <SaveLoadView />;
+      case 'guide':
+        return <GuideView onOpenSaves={() => setCurrentView('saves')} />;
       case 'profile':
         return <ProfileView onOpenSaves={() => setCurrentView('saves')} />;
       default:
@@ -189,7 +186,7 @@ function AppContent() {
                   <ArthyaLogo size={40} />
                   <div>
                     <h3 className="bg-clip-text text-transparent" style={WORDMARK_STYLE}>Arthya</h3>
-                    <p className="text-xs text-muted-foreground whitespace-nowrap">Smart Financial Planning</p>
+                    <p className="hidden sm:block text-xs text-muted-foreground whitespace-nowrap">Smart Financial Planning</p>
                   </div>
                 </div>
                 
@@ -212,7 +209,7 @@ function AppContent() {
                       <PixelSprite rows={CRYSTAL} palette={CRYSTAL_BY_STATE[crystal.state]} size={20} />
                     </button>
                   )}
-                  <PrivacyInfoPopover />
+                  <PrivacyInfoPopover onOpenGuide={() => setCurrentView('guide')} />
                   <ProfileMenu 
                     onNavigateToSettings={() => setCurrentView('settings')}
                     onNavigateToProfile={() => setCurrentView('profile')}
@@ -251,7 +248,7 @@ function AppContent() {
           </main>
         </div>
       
-      {!game.onboarded && <Onboarding />}
+      {!game.onboarded && <Onboarding onOpenGuide={() => setCurrentView('guide')} />}
 
       <Toaster position="top-right" />
     </>

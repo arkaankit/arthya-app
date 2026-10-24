@@ -14,7 +14,7 @@ export function UnlinkedItems() {
   if (items.length === 0) return null;
 
   return (
-    <Card className="p-6 border-border/50">
+    <Card className="p-4 sm:p-6 border-border/50">
       <div className="flex items-start gap-3">
         <div className="p-2.5 rounded-xl bg-orange-500/10 shrink-0">
           <Link2 className="w-5 h-5 text-orange-600 dark:text-orange-400" />

@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Check } from "lucide-react";
+import { ArthyaLogo, WORDMARK_STYLE } from "./ArthyaLogo";
 import { useData } from "../lib/data-context";
 import { CURRENCIES, getCurrencySymbol } from "../lib/currency";
 import { totalXp } from "../lib/game";
@@ -19,7 +20,7 @@ const labelCls = "text-xs font-bold uppercase tracking-[0.08em] text-muted-foreg
 const inputCls = "h-11 w-full rounded-md border border-border bg-input-background px-3 text-base";
 
 // First-run setup, full screen: welcome, player, home currency, first quest, first save.
-export function Onboarding() {
+export function Onboarding({ onOpenGuide }: { onOpenGuide: () => void }) {
   const {
     profile, updateProfile, incomeStreams, addIncome, game, setPlayer, confirmCurrency,
     finishOnboarding, downloadBackup,
@@ -33,6 +34,10 @@ export function Onboarding() {
   const [source, setSource] = useState("");
   const [amount, setAmount] = useState("");
   const [questError, setQuestError] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Each step starts at the top; otherwise a phone keeps the previous step's scroll position.
+  useEffect(() => { scrollRef.current?.scrollTo(0, 0); }, [step]);
 
   const sprite = creatureSprite(creature, color);
   const creatureInfo = CREATURES.find(c => c.id === creature)!;
@@ -66,9 +71,21 @@ export function Onboarding() {
   // Phone shows the illustration only on the welcome and save steps; larger screens always do.
   const artOnPhone = step === 0 || step === 4;
 
+  // Logo and name: top of the screen on phones, top of the setup card on larger screens.
+  const brand = (
+    <div className="flex items-center gap-2.5">
+      <ArthyaLogo size={36} />
+      <div>
+        <p className="text-xl leading-tight bg-clip-text text-transparent" style={WORDMARK_STYLE}>Arthya</p>
+        <p className="text-xs text-muted-foreground">Smart Financial Planning</p>
+      </div>
+    </div>
+  );
+
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-background text-foreground" role="dialog" aria-modal="true" aria-label="Welcome to Arthya">
+    <div ref={scrollRef} className="fixed inset-0 z-50 overflow-y-auto bg-background text-foreground" role="dialog" aria-modal="true" aria-label="Welcome to Arthya">
       <div className="min-h-full flex flex-col lg:flex-row">
+        <div className="sm:hidden px-6 pt-4">{brand}</div>
         <div
           className={`${artOnPhone ? "flex" : "hidden sm:flex"} relative overflow-hidden items-center justify-center shrink-0
             ${step === 0 ? "h-[290px]" : "h-[190px]"} sm:h-[300px] lg:h-auto lg:flex-1
@@ -94,6 +111,7 @@ export function Onboarding() {
 
         <div className="flex-1 min-w-0 flex flex-col items-center lg:justify-center px-6 pt-4 pb-7 sm:px-6 sm:pt-8 sm:pb-12 lg:p-12">
           <div className="w-full flex-1 sm:flex-none flex flex-col sm:max-w-[560px] lg:max-w-[480px] sm:bg-card sm:border sm:border-border sm:rounded-2xl sm:shadow-card sm:px-8 sm:pt-7 sm:pb-8">
+            <div className="hidden sm:flex mb-3">{brand}</div>
             <div className="flex items-center justify-between h-11 shrink-0">
               <div className="flex gap-1.5" role="progressbar" aria-label="Setup progress" aria-valuemin={1} aria-valuemax={STEPS} aria-valuenow={step + 1}>
                 {Array.from({ length: STEPS }, (_, i) => (
@@ -304,6 +322,12 @@ export function Onboarding() {
                     <button className={primaryBtn} onClick={downloadBackup}>Save my game</button>
                   </div>
                 )}
+                <button
+                  className="mt-3 h-11 text-sm font-semibold text-muted-foreground hover:text-foreground"
+                  onClick={() => { onOpenGuide(); finishOnboarding(); }}
+                >
+                  First time? See how Arthya works
+                </button>
               </div>
             )}
           </div>

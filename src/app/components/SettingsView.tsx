@@ -147,11 +147,11 @@ export function SettingsView({ onResetData, onOpenSaves }: SettingsViewProps) {
 
         {/* User Profile */}
         <div className="p-4 sm:p-6 bg-card border border-border rounded-xl shadow-card">
-          <div className="flex items-start gap-6">
+          <div className="flex flex-col sm:flex-row items-start gap-4 sm:gap-6">
             {/* Avatar Section */}
             <div className="flex flex-col items-center gap-2">
               <div className="relative group">
-                <Avatar className="w-24 h-24">
+                <Avatar className="w-16 h-16 sm:w-24 sm:h-24">
                   <AvatarImage src={isEditingProfile ? editedProfile.avatar : profile?.avatar} />
                   <AvatarFallback className="bg-gradient-to-br from-amber-500 via-yellow-600 to-orange-600 text-white text-2xl">
                     {profile?.name ? getInitials(profile.name) : 'U'}
@@ -176,8 +176,8 @@ export function SettingsView({ onResetData, onOpenSaves }: SettingsViewProps) {
             </div>
 
             {/* Profile Information */}
-            <div className="flex-1">
-              <div className="flex items-center justify-between mb-4">
+            <div className="flex-1 w-full min-w-0">
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
                 <h4>Profile Information</h4>
                 {!isEditingProfile ? (
                   <Button 

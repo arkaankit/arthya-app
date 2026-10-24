@@ -4,7 +4,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 import { Shield, Sparkles } from "lucide-react";
 import { ScrollArea } from "./ui/scroll-area";
 
-export function PrivacyInfoPopover() {
+export function PrivacyInfoPopover({ onOpenGuide }: { onOpenGuide: () => void }) {
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -40,6 +40,9 @@ export function PrivacyInfoPopover() {
                       <li>Complete privacy - all data stays on your device</li>
                     </ul>
                   </div>
+                  <button onClick={onOpenGuide} className="font-semibold text-orange-600 dark:text-orange-400 hover:underline">
+                    How Arthya works →
+                  </button>
                 </div>
               </div>
             </div>

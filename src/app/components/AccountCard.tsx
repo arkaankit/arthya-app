@@ -97,7 +97,7 @@ export function AccountCard({ id, name, balance, currency, type, color }: Accoun
               </div>
               <div className="min-w-0">
                 <p className="text-xs text-muted-foreground">Out / month</p>
-                <p className="font-semibold text-red-600 dark:text-red-400 truncate">−{formatCurrency(flow.out, currency, { decimals: 0 })}</p>
+                <p className="font-semibold text-red-600 dark:text-red-400 truncate">{flow.out > 0 && "−"}{formatCurrency(flow.out, currency, { decimals: 0 })}</p>
               </div>
               <div className="min-w-0">
                 <p className="text-xs text-muted-foreground">Net</p>
