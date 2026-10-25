@@ -6,17 +6,18 @@ interface AccountSelectProps {
   label: string;
   value: string; // "" = no account
   onChange: (accountId: string) => void;
+  optional?: boolean; // adds "(Optional)" to the label
 }
 
 // Optional account picker shared by the income, expense and goal dialogs.
-export function AccountSelect({ label, value, onChange }: AccountSelectProps) {
+export function AccountSelect({ label, value, onChange, optional = true }: AccountSelectProps) {
   const { accounts } = useData();
   // An item can point at an account that was since deleted; show that as "No account".
   const current = accounts.some(a => a.id === value) ? value : "_none";
 
   return (
     <div>
-      <Label htmlFor="account">{label} (Optional)</Label>
+      <Label htmlFor="account">{label}{optional && " (Optional)"}</Label>
       <Select value={current} onValueChange={(v) => onChange(v === "_none" ? "" : v)}>
         <SelectTrigger id="account" className="mt-2">
           <SelectValue />

@@ -110,6 +110,7 @@ export interface UserProfile {
  */
 export interface UserPreferences {
   isDarkMode: boolean;
+  worldView?: boolean; // Dashboard shows the World island instead of the Classic cards
 }
 
 /**
