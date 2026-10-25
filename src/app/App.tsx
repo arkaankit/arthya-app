@@ -107,7 +107,7 @@ function AppContent() {
   const renderView = () => {
     switch (currentView) {
       case 'dashboard':
-        return <DashboardView />;
+        return <DashboardView onOpenProfile={() => setCurrentView('profile')} />;
       case 'income':
         return <IncomeView />;
       case 'expenses':
@@ -127,7 +127,7 @@ function AppContent() {
       case 'profile':
         return <ProfileView onOpenSaves={() => setCurrentView('saves')} />;
       default:
-        return <DashboardView />;
+        return <DashboardView onOpenProfile={() => setCurrentView('profile')} />;
     }
   };
 

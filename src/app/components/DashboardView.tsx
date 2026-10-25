@@ -9,35 +9,18 @@ import { PrimaryButton } from "./PrimaryButton";
 import { Card } from "./ui/card";
 import { Alert, AlertDescription } from "./ui/alert";
 import { Button } from "./ui/button";
-import { 
-  Wallet, 
-  TrendingUp, 
-  TrendingDown, 
-  PiggyBank,
-  ArrowUpRight,
-  ArrowDownRight,
-  Info,
-  Plus
-} from "lucide-react";
+import { Wallet, TrendingUp, TrendingDown, Info, Plus } from "lucide-react";
 import { useData } from "../lib/data-context";
 import { formatCurrency, convertCurrency } from "../lib/currency";
 import { convertToMonthly } from "../lib/frequency";
 import { plural } from "../lib/constants";
-import {
-  LineChart,
-  Line,
-  PieChart,
-  Pie,
-  Cell,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer
-} from "recharts";
+import { BarChart, Bar, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { PlayerAvatar } from "./PlayerAvatar";
+import { levelInfo } from "../lib/game";
+import { BADGE_SPRITES, BUILDINGS } from "../lib/sprites";
 
-export function DashboardView() {
-  const { accounts, incomeStreams, expenses, goals, profile } = useData();
+export function DashboardView({ onOpenProfile }: { onOpenProfile: () => void }) {
+  const { accounts, incomeStreams, expenses, goals, profile, game, xp, quests } = useData();
   const [showAddAccount, setShowAddAccount] = useState(false);
   const [showAddIncome, setShowAddIncome] = useState(false);
   const [showAddExpense, setShowAddExpense] = useState(false);
@@ -171,92 +154,101 @@ export function DashboardView() {
     );
   }
 
+  const level = levelInfo(xp);
+  const levelPct = Math.round(((xp - level.floor) / (level.next - level.floor)) * 100);
+  const name = game.player?.name || (profile?.name && profile.name !== 'User' ? profile.name : '');
+  const hour = new Date().getHours();
+  const greeting = `Good ${hour < 12 ? 'morning' : hour < 17 ? 'afternoon' : 'evening'}${name ? `, ${name}` : ''}`;
+  const unlinked = incomeStreams.filter(i => !i.accountId).length + expenses.filter(e => !e.accountId).length;
+  const biggest = Math.max(...expensesByCategory.map(c => c.value), 1);
+
   return (
     <div className="space-y-6">
       <ExpenseDialog open={showAddExpense} onOpenChange={setShowAddExpense} />
-      {/* Header */}
-      <div>
-        <h2 className="page-title mb-2">Dashboard</h2>
-        <p className="text-muted-foreground">
-          Overview of your financial health
-        </p>
+
+      {/* Player header */}
+      <div className="flex items-center gap-4">
+        {game.player && (
+          <div className="w-16 h-16 sm:w-[84px] sm:h-[84px] shrink-0 rounded-xl bg-card border border-border flex items-end justify-center pb-1">
+            <PlayerAvatar size={56} className="sm:w-[64px] sm:h-auto" />
+          </div>
+        )}
+        <div className="min-w-0">
+          <h2 className="page-title">{greeting}</h2>
+          {game.calm ? (
+            <p className="text-muted-foreground">Overview of your financial health</p>
+          ) : (
+            <button onClick={onOpenProfile} className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-left">
+              <span className="text-[13px] font-bold text-orange-600 dark:text-orange-400">Level {level.level} · {level.title}</span>
+              <span className="w-40 h-2 rounded-sm bg-card overflow-hidden" role="img" aria-label={`${xp} XP, ${level.next - xp} to level ${level.level + 1}`}>
+                <span className="block h-full bg-orange-500" style={{ width: `${levelPct}%` }} />
+              </span>
+              <span className="text-xs text-muted-foreground">{xp} XP · {level.next - xp} to level {level.level + 1}</span>
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* Key Metrics */}
+      {/* HUD */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <DashboardMetricCard
-          title="Total Balance"
+          title="In your vaults"
           value={formatCurrency(totalBalance, baseCurrency)}
-          change={`Across ${accounts.length} ${accounts.length === 1 ? 'account' : 'accounts'}`}
-          icon={Wallet}
-          iconColor="#ff5e24"
+          change={plural(accounts.length, 'account')}
+          sprite={BUILDINGS.account}
         />
         <DashboardMetricCard
-          title="Monthly Income"
-          value={formatCurrency(totalIncome, baseCurrency)}
-          change={`From ${incomeStreams.length} ${incomeStreams.length === 1 ? 'source' : 'sources'}`}
-          icon={TrendingUp}
-          iconColor="#10B981"
+          title="Coming in"
+          value={`+${formatCurrency(totalIncome, baseCurrency)}`}
+          valueClass="text-green-600 dark:text-green-400"
+          change={`per month · ${plural(incomeStreams.length, 'source')}`}
+          sprite={BUILDINGS.income}
         />
         <DashboardMetricCard
-          title="Monthly Expenses"
-          value={formatCurrency(totalExpenses, baseCurrency)}
-          change={`${expenses.length} recurring ${expenses.length === 1 ? 'item' : 'items'}`}
-          icon={TrendingDown}
-          iconColor="#EF4444"
+          title="Going out"
+          value={`−${formatCurrency(totalExpenses, baseCurrency)}`}
+          valueClass="text-red-600 dark:text-red-400"
+          change={unlinked > 0 ? `per month · ${unlinked} not linked` : 'per month'}
+          sprite={BUILDINGS.expense}
         />
         <DashboardMetricCard
-          title="Net Savings"
-          value={formatCurrency(netSavings, baseCurrency)}
-          change={totalIncome > 0 ? `${savingsRate.toFixed(1)}% of income saved` : 'Add income to see your rate'}
-          changeType={totalIncome === 0 ? 'neutral' : netSavings >= 0 ? 'positive' : 'negative'}
-          icon={PiggyBank}
-          iconColor="#ffa47a"
+          title="Kept"
+          value={totalIncome > 0 ? `${Math.round(savingsRate)}%` : '—'}
+          valueClass={netSavings >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}
+          change={totalIncome > 0 ? `${formatCurrency(netSavings, baseCurrency)} a month stays with you` : 'Add income to see this'}
+          sprite={BADGE_SPRITES['first-coin']}
         />
       </div>
 
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <Card className="p-4 sm:p-6 lg:col-span-2 border-border/50">
-          <h3 className="mb-1">Balance Projection</h3>
-          <p className="text-sm text-muted-foreground mb-6">
-            Next 12 months if your current recurring income and expenses stay the same
-          </p>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={projection}>
-              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
-              <XAxis
-                dataKey="month"
-                stroke="var(--muted-foreground)"
-                tick={{ fill: 'var(--muted-foreground)', fontSize: 12 }}
-              />
-              <YAxis
-                width={72}
-                stroke="var(--muted-foreground)"
-                tick={{ fill: 'var(--muted-foreground)', fontSize: 12 }}
-                tickFormatter={(v: number) => formatCurrency(v, baseCurrency, { decimals: 0 })}
-              />
-              <Tooltip
-                formatter={(v: number) => [formatCurrency(v, baseCurrency), 'Projected balance']}
-                contentStyle={{
-                  backgroundColor: 'var(--card)',
-                  border: '1px solid var(--border)',
-                  borderRadius: '8px'
-                }}
-              />
-              <Line
-                type="monotone"
-                dataKey="balance"
-                stroke="#ff5e24"
-                strokeWidth={2}
-                name="Projected balance"
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </Card>
+      {/* This month's quests */}
+      {!game.calm && quests.length > 0 && (
+        <div>
+          <div className="flex items-baseline justify-between gap-3 mb-3">
+            <h3 className="font-extrabold">This month's quests</h3>
+            <button onClick={onOpenProfile} className="text-sm font-bold text-orange-600 dark:text-orange-400 hover:underline">All quests and badges</button>
+          </div>
+          <div className="grid gap-3 md:grid-cols-3">
+            {quests.map(q => (
+              <div key={q.id} className="rounded-xl border border-border bg-card p-4 flex flex-col gap-2">
+                <div className="flex justify-between gap-2">
+                  <span className="text-sm font-extrabold">{q.title}</span>
+                  <span className="text-xs font-extrabold text-orange-600 dark:text-orange-400 whitespace-nowrap">+{q.xp} XP</span>
+                </div>
+                <span className="text-xs text-muted-foreground">{q.detail}</span>
+                <span className="h-1.5 rounded-sm bg-secondary overflow-hidden"><span className="block h-full bg-orange-300" style={{ width: `${q.pct}%` }} /></span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Where your coins go: one block per twelfth of the biggest category */}
         <Card className="p-4 sm:p-6 border-border/50">
-          <h3 className="mb-6">Expenses by Category</h3>
+          <div className="flex items-baseline justify-between mb-4">
+            <h3 className="font-extrabold">Where your coins go</h3>
+            <span className="text-xs text-muted-foreground">per month</span>
+          </div>
           {expensesByCategory.length === 0 ? (
             <div className="h-40 rounded-xl border-2 border-dashed border-border flex flex-col items-center justify-center gap-3 text-center px-4">
               <p className="text-sm text-muted-foreground">No expenses yet. Add one to see where your money goes.</p>
@@ -265,57 +257,54 @@ export function DashboardView() {
               </Button>
             </div>
           ) : (
-          <ResponsiveContainer width="100%" height={260}>
-            <PieChart>
-              <Pie
-                data={expensesByCategory}
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={90}
-                paddingAngle={5}
-                dataKey="value"
-              >
-                {expensesByCategory.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip
-                formatter={(v: number) => formatCurrency(v, baseCurrency)}
-                contentStyle={{
-                  backgroundColor: 'var(--card)',
-                  border: '1px solid var(--border)',
-                  borderRadius: '8px'
-                }}
-              />
-            </PieChart>
-          </ResponsiveContainer>
+            <div className="space-y-3">
+              {[...expensesByCategory].sort((a, b) => b.value - a.value).map(c => {
+                const filled = Math.max(1, Math.round((c.value / biggest) * 12));
+                return (
+                  <div key={c.name} className="flex items-center gap-3">
+                    <span className="w-24 sm:w-32 shrink-0 text-sm font-semibold truncate">{c.name}</span>
+                    <span className="flex-1 flex gap-[3px]" role="img" aria-label={`${c.name}: ${formatCurrency(c.value, baseCurrency)}`}>
+                      {Array.from({ length: 12 }, (_, i) => (
+                        <span key={i} className="flex-1 max-w-[14px] h-3.5 rounded-[2px]" style={{ background: i < filled ? c.color : 'var(--secondary)' }} />
+                      ))}
+                    </span>
+                    <span className="w-20 sm:w-24 shrink-0 text-right text-sm font-bold">{formatCurrency(c.value, baseCurrency, { decimals: 0 })}</span>
+                  </div>
+                );
+              })}
+            </div>
           )}
-          <div className="mt-4 space-y-2">
-            {expensesByCategory.map((category) => (
-              <div key={category.name} className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2">
-                  <div 
-                    className="w-3 h-3 rounded-full" 
-                    style={{ backgroundColor: category.color }}
-                  />
-                  <span>{category.name}</span>
-                </div>
-                <span className="text-muted-foreground">
-                  {formatCurrency(category.value, baseCurrency)}
-                </span>
-              </div>
-            ))}
+        </Card>
+
+        <Card className="p-4 sm:p-6 border-border/50">
+          <div className="flex items-baseline justify-between mb-4">
+            <h3 className="font-extrabold">Vault forecast</h3>
+            <span className="text-xs text-muted-foreground">if this month repeats</span>
           </div>
+          <ResponsiveContainer width="100%" height={220}>
+            <BarChart data={projection}>
+              <XAxis dataKey="month" stroke="var(--muted-foreground)" tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }} tickLine={false} />
+              <YAxis hide />
+              <Tooltip
+                cursor={{ fill: 'var(--secondary)' }}
+                formatter={(v: number) => [formatCurrency(v, baseCurrency), 'Projected balance']}
+                contentStyle={{ backgroundColor: 'var(--card)', border: '1px solid var(--border)', borderRadius: '8px' }}
+              />
+              <Bar dataKey="balance" radius={[2, 2, 0, 0]}>
+                {projection.map((_, i) => <Cell key={i} fill={i === projection.length - 1 ? '#ff5e24' : '#ffa47a'} />)}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+          <p className="mt-2 text-xs text-muted-foreground">
+            {formatCurrency(totalBalance, baseCurrency, { decimals: 0 })} now → about {formatCurrency(projection[projection.length - 1].balance, baseCurrency, { decimals: 0 })} in 12 months
+          </p>
         </Card>
       </div>
 
       {/* Accounts Overview */}
       {accounts.length > 0 && (
         <div>
-          <div className="flex items-center justify-between mb-4">
-            <h3>Accounts Overview</h3>
-          </div>
+          <h3 className="font-extrabold mb-3">Your vaults</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {accounts.slice(0, 3).map((account) => (
               <AccountCard key={account.id} {...account} />
@@ -327,9 +316,7 @@ export function DashboardView() {
       {/* Goals Progress */}
       {goals.length > 0 && (
         <div>
-          <div className="flex items-center justify-between mb-3">
-            <h3>Financial Goals</h3>
-          </div>
+          <h3 className="font-extrabold mb-3">Financial Goals</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {goals.slice(0, 3).map((goal) => (
               <GoalProgressCard key={goal.id} {...goal} />
@@ -337,61 +324,6 @@ export function DashboardView() {
           </div>
         </div>
       )}
-
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Card className="p-4 sm:p-6 border-border/50">
-          <div className="flex items-start justify-between mb-2 sm:mb-4">
-            <div>
-              <p className="text-muted-foreground mb-1">Income Sources</p>
-              <h2>{incomeStreams.length}</h2>
-            </div>
-            <div className="p-3 rounded-xl bg-green-500/10">
-              <ArrowUpRight className="w-6 h-6 text-green-600 dark:text-green-400" />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Active Sources</span>
-              <span>
-                {plural(incomeStreams.length, "source")}
-              </span>
-            </div>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Categories</span>
-              <span>
-                {plural(new Set(incomeStreams.map(i => i.category)).size, "category", "categories")}
-              </span>
-            </div>
-          </div>
-        </Card>
-
-        <Card className="p-4 sm:p-6 border-border/50">
-          <div className="flex items-start justify-between mb-2 sm:mb-4">
-            <div>
-              <p className="text-muted-foreground mb-1">Active Expenses</p>
-              <h2>{expenses.length}</h2>
-            </div>
-            <div className="p-3 rounded-xl bg-red-500/10">
-              <ArrowDownRight className="w-6 h-6 text-red-600 dark:text-red-400" />
-            </div>
-          </div>
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Active Expenses</span>
-              <span>
-                {plural(expenses.length, "item")}
-              </span>
-            </div>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Categories</span>
-              <span>
-                {plural(new Set(expenses.map(e => e.category)).size, "category", "categories")}
-              </span>
-            </div>
-          </div>
-        </Card>
-      </div>
     </div>
   );
 }

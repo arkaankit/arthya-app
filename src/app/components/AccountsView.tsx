@@ -8,13 +8,14 @@ import { Card } from "./ui/card";
 import { Tabs, TabsList, TabsTrigger } from "./ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { Alert, AlertDescription } from "./ui/alert";
-import { Plus, Info, Wallet, Building2, TrendingUp } from "lucide-react";
+import { Plus, Info } from "lucide-react";
 import { useData } from "../lib/data-context";
 import { formatCurrency, convertCurrency } from "../lib/currency";
 import { plural } from "../lib/constants";
+import { convertToMonthly, type Frequency } from "../lib/frequency";
 
 export function AccountsView() {
-  const { accounts, profile } = useData();
+  const { accounts, incomeStreams, expenses, profile } = useData();
   const baseCurrency = profile?.currency || 'USD';
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [filter, setFilter] = useState<string>('all');
@@ -38,6 +39,15 @@ export function AccountsView() {
   }, 0);
   
   const totalBalance = totalBankBalance + totalInvestmentBalance;
+
+  // Monthly amounts in the home currency: what linked items add to the vaults, and what unlinked expenses miss.
+  const monthly = (i: { amount: number; currency: string; frequency: string }) =>
+    convertToMonthly(convertCurrency(i.amount, i.currency, baseCurrency), i.frequency as Frequency);
+  const linked = (i: { accountId?: string }) => accounts.some(a => a.id === i.accountId);
+  const monthlyNet = incomeStreams.filter(linked).reduce((t, i) => t + monthly(i), 0) - expenses.filter(linked).reduce((t, e) => t + monthly(e), 0);
+  const lost = expenses.filter(e => !linked(e));
+  const lostOut = lost.reduce((t, e) => t + monthly(e), 0);
+  const lostCount = lost.length + incomeStreams.filter(i => !linked(i)).length;
 
   return (
     <div className="space-y-6">
@@ -65,54 +75,19 @@ export function AccountsView() {
         </Alert>
       )}
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="p-4 sm:p-6 border-border/50 bg-gradient-to-br from-amber-500/10 to-transparent">
-          <div className="flex items-start justify-between mb-2 sm:mb-4">
-            <div>
-              <p className="text-muted-foreground mb-1">Total Net Worth</p>
-              <h2 className="bg-gradient-to-r from-amber-600 to-orange-600 bg-clip-text text-transparent">
-                {formatCurrency(totalBalance, baseCurrency)}
-              </h2>
-            </div>
-            <div className="p-3 rounded-xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 shadow-sm shadow-amber-500/20">
-              <Wallet className="w-6 h-6 text-amber-600 dark:text-amber-400" />
-            </div>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Across {plural(accounts.length, "account")}
-          </p>
-        </Card>
-
-        <Card className="p-4 sm:p-6 border-border/50">
-          <div className="flex items-start justify-between mb-2 sm:mb-4">
-            <div>
-              <p className="text-muted-foreground mb-1">Bank Accounts</p>
-              <h3>{formatCurrency(totalBankBalance, baseCurrency)}</h3>
-            </div>
-            <div className="p-3 rounded-xl bg-green-500/10">
-              <Building2 className="w-5 h-5 text-green-600 dark:text-green-400" />
-            </div>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            {plural(bankAccounts.length, "account")}
-          </p>
-        </Card>
-
-        <Card className="p-4 sm:p-6 border-border/50">
-          <div className="flex items-start justify-between mb-2 sm:mb-4">
-            <div>
-              <p className="text-muted-foreground mb-1">Investments</p>
-              <h3>{formatCurrency(totalInvestmentBalance, baseCurrency)}</h3>
-            </div>
-            <div className="p-3 rounded-xl bg-gradient-to-br from-yellow-500/10 to-orange-500/10">
-              <TrendingUp className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
-            </div>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            {plural(investmentAccounts.length, "account")}
-          </p>
-        </Card>
+      {/* Summary */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 sm:gap-4">
+        {[
+          { label: 'In your vaults', value: formatCurrency(totalBalance, baseCurrency), tone: '', note: `${plural(bankAccounts.length, 'bank account')}, ${plural(investmentAccounts.length, 'investment')}` },
+          { label: 'Filling up each month', value: `${monthlyNet >= 0 ? '+' : '−'}${formatCurrency(Math.abs(monthlyNet), baseCurrency)}`, tone: monthlyNet >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400', note: 'linked income minus linked expenses' },
+          { label: 'Lost coins', value: `${formatCurrency(lostOut, baseCurrency)} / mo`, tone: lostCount > 0 ? 'text-red-600 dark:text-red-400' : '', note: lostCount > 0 ? `${plural(lostCount, 'item')} no vault is counting` : 'Everything is linked' },
+        ].map(s => (
+          <Card key={s.label} className="p-4 sm:p-5 gap-0 border-border/50">
+            <p className="text-xs font-bold uppercase tracking-[0.06em] text-muted-foreground">{s.label}</p>
+            <p className={`text-xl sm:text-2xl font-extrabold truncate ${s.tone}`}>{s.value}</p>
+            <p className="text-xs text-muted-foreground">{s.note}</p>
+          </Card>
+        ))}
       </div>
 
       {/* Filter - Mobile Dropdown */}
@@ -186,20 +161,12 @@ export function AccountsView() {
         </Card>
       )}
 
-      {/* Privacy Mode Info */}
-      <Card className="p-4 sm:p-6 border-border/50 bg-gradient-to-br from-amber-500/5 to-transparent">
-        <div className="flex items-start gap-4">
-          <div className="p-3 rounded-xl bg-gradient-to-br from-amber-500/10 to-orange-500/10 shadow-sm shadow-amber-500/10 flex-shrink-0">
-            <Building2 className="w-6 h-6 text-amber-600 dark:text-amber-400" />
-          </div>
-          <div>
-            <h4 className="mb-2">Privacy-First Account Management</h4>
-            <p className="text-sm text-muted-foreground">
-              Your accounts are stored only in this browser and never sent to a server. Track your
-              real accounts, or add simulated ones to plan without sharing actual figures.
-            </p>
-          </div>
-        </div>
+      <Card className="p-4 sm:p-6 gap-2 border-border/50">
+        <h4 className="font-extrabold">Why link to a vault?</h4>
+        <p className="text-sm text-muted-foreground">
+          Each vault then shows its own money in and out, so you can see which account is growing and which is leaking.
+          Your accounts stay in this browser and are never sent to a server.
+        </p>
       </Card>
     </div>
   );

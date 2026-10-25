@@ -20,7 +20,7 @@ export function UnlinkedItems() {
           <Link2 className="w-5 h-5 text-orange-600 dark:text-orange-400" />
         </div>
         <div className="min-w-0">
-          <h3>Not linked to an account</h3>
+          <h3 className="font-extrabold">Lost coins: not linked to an account</h3>
           <p className="text-sm text-muted-foreground mt-1">
             {accounts.length === 0
               ? "Add an account to see where this money comes in and goes out."
