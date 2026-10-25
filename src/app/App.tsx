@@ -81,7 +81,7 @@ function AppContent() {
     const newDarkMode = !isDarkMode;
     setIsDarkMode(newDarkMode);
     document.documentElement.classList.toggle('dark');
-    storage.setPreferences({ isDarkMode: newDarkMode });
+    storage.setPreferences({ ...storage.getPreferences(), isDarkMode: newDarkMode });
   };
   
   const handleResetData = () => {

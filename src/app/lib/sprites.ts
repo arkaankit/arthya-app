@@ -52,11 +52,13 @@ export const CRYSTAL_BY_STATE = { glowing: CRYSTAL_LIT, fading: CRYSTAL_DIM, dar
 
 // --- Buildings: income (office), account (vault), expense (market), asset (house) ---
 const TOWN: Palette = { o: '#232629', w: '#ffffff', g: '#7cc4fa', d: '#6c3200', s: '#c9d3dc', p: '#989ea4', y: '#e3f1fe', r: '#ff5e24', b: '#fff4ec' };
-export const BUILDINGS: Record<'income' | 'account' | 'expense' | 'asset', { rows: SpriteRows; palette: Palette }> = {
+export const BUILDINGS: Record<'income' | 'account' | 'expense' | 'asset' | 'vehicle' | 'investment', { rows: SpriteRows; palette: Palette }> = {
   income: { palette: TOWN, rows: ['oooooooooooo', 'ogwgwgwgwgwo', 'owwwwwwwwwwo', 'ogwgwgwgwgwo', 'owwwwwwwwwwo', 'ogwgwgwgwgwo', 'owwwwwwwwwwo', 'ogwgwgwgwgwo', 'owwwwddwwwwo', 'owwwwddwwwwo', 'oooooooooooo'] },
   account: { palette: TOWN, rows: ['......oo......', '....oossoo....', '..oossssssoo..', 'oossssssssssoo', 'oooooooooooooo', '.opwpwwpwwpwo.', '.opwpwwpwwpwo.', '.opwpwwpwwpwo.', '.opwpwwpwwpwo.', 'oooooooooooooo', 'oyyyyyyyyyyyyo', 'oooooooooooooo'] },
   expense: { palette: { ...TOWN, y: '#ffb36b' }, rows: ['oooooooooooooo', 'orwrwrwrwrwrwo', 'orwrwrwrwrwrwo', '.oooooooooooo.', '.obbbbbbbbbbo.', '.obbybbybbybo.', '.obbbbbbbbbbo.', '.oooooooooooo.'] },
   asset: { palette: TOWN, rows: ['......oo......', '.....orro.....', '....orrrro....', '...orrrrrro...', '..orrrrrrrro..', '.orrrrrrrrrro.', 'oooooooooooooo', '.owwwwwwwwwwo.', '.owggwwwwddwo.', '.owggwwwwddwo.', '.owwwwwwwwddo.', '.oooooooooooo.'] },
+  vehicle: { palette: { o: '#232629', c: '#7cc4fa', w: '#e3f1fe', k: '#5c6066' }, rows: ['....oooooo....', '...occwwcco...', '..occwwwwccco.', 'occcccccccccco', 'occcccccccccco', 'oooooooooooooo', '..oko....oko..', '...o......o...'] },
+  investment: { palette: { ...TOWN, g: '#22a06b' }, rows: ['.....oo.....', '....oggo....', '...oggggo...', '..oooooooo..', '..owwwwwwo..', '..owwwwwgo..', '..owwwwggo..', '..owwwgwwo..', '..owwggwwo..', '..owgwwwwo..', '..oggwwwwo..', '.oooooooooo.', '.oyyyyyyyyo.', '.oooooooooo.'] },
 };
 
 // --- Badges (9x9) ---

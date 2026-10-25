@@ -16,6 +16,8 @@ import { convertToMonthly } from "../lib/frequency";
 import { plural } from "../lib/constants";
 import { BarChart, Bar, Cell, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { PlayerAvatar } from "./PlayerAvatar";
+import { WorldView } from "./WorldView";
+import { storage } from "../lib/storage";
 import { levelInfo } from "../lib/game";
 import { BADGE_SPRITES, BUILDINGS } from "../lib/sprites";
 
@@ -24,6 +26,8 @@ export function DashboardView({ onOpenProfile }: { onOpenProfile: () => void }) 
   const [showAddAccount, setShowAddAccount] = useState(false);
   const [showAddIncome, setShowAddIncome] = useState(false);
   const [showAddExpense, setShowAddExpense] = useState(false);
+  const [world, setWorld] = useState(() => storage.getPreferences().worldView === true);
+  const chooseView = (on: boolean) => { setWorld(on); storage.setPreferences({ ...storage.getPreferences(), worldView: on }); };
   const baseCurrency = profile?.currency || 'USD';
   
   // Convert all amounts to base currency
@@ -167,7 +171,8 @@ export function DashboardView({ onOpenProfile }: { onOpenProfile: () => void }) 
       <ExpenseDialog open={showAddExpense} onOpenChange={setShowAddExpense} />
 
       {/* Player header */}
-      <div className="flex items-center gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+        <div className="flex items-center gap-4 min-w-0 flex-1">
         {game.player && (
           <div className="w-16 h-16 sm:w-[84px] sm:h-[84px] shrink-0 rounded-xl bg-card border border-border flex items-end justify-center pb-1">
             <PlayerAvatar size={56} className="sm:w-[64px] sm:h-auto" />
@@ -187,8 +192,22 @@ export function DashboardView({ onOpenProfile }: { onOpenProfile: () => void }) 
             </button>
           )}
         </div>
+        </div>
+        <div className="flex shrink-0 p-[3px] rounded-lg bg-card border border-border" role="group" aria-label="Dashboard style">
+          {([['World', true], ['Classic', false]] as const).map(([label, on]) => (
+            <button
+              key={label}
+              onClick={() => chooseView(on)}
+              aria-pressed={world === on}
+              className={`flex-1 sm:flex-none h-9 px-4 rounded-md text-sm font-bold transition-colors ${world === on ? (on ? 'bg-[#ff5e24] text-white' : 'bg-foreground text-background') : 'text-foreground hover:bg-secondary'}`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
       </div>
 
+      {world ? <WorldView /> : <>
       {/* HUD */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <DashboardMetricCard
@@ -324,6 +343,7 @@ export function DashboardView({ onOpenProfile }: { onOpenProfile: () => void }) 
           </div>
         </div>
       )}
+      </>}
     </div>
   );
 }
